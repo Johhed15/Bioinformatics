@@ -192,14 +192,14 @@ We  get the same protein sequence as this is the sequence from https://www.ncbi.
 
 Then in the end of the sequence we got there is an X which i guess is a stop codon.
 
-To use backtranseq we could'nt find the correct codon table so we use 'Homo ' Sapiens' and got the following results. 
+To use backtranseq we couldn't find the correct codon table so we use 'Homo ' Sapiens' and got the following results. 
 
 ```{r}
 branchipus_3 <- read.fasta('emboss_backtranseq-I20241115-101532-0798-77094578-p1m.fasta')
 
-
+code_seq <- branchipus_3$MK465080.1_2
 print(branchipus_3)
-
+code_seq
 
 
 ```
@@ -214,32 +214,38 @@ of the your coding strand DNA. Consider also backtranseqambiq (https://www.ebi.a
 why. Save (and submit) the nucleotide sequence of the template strand that corresponds to these
 amino acids as a FASTA format file.
 
-# Här ska det in mer kod typ reversing och complement
-
 
 Results from backtranseqambiq with codon table 5 'Invertebrate Mitochondrial'.
 
 ```{r}
-branchipus_3 <- read.fasta('emboss_backtranambig-I20241115-101314-0071-49255505-p1m.fasta')
+branchipus_4 <- read.fasta('emboss_backtranambig-I20241115-101314-0071-49255505-p1m.fasta')
 
-print(branchipus_3)
+print(branchipus_4)
 
 ```
 
 
 
+Results from backtranseqambiq with codon table 5 'Invertebrate Mitochondrial', reverse and complemented sequence.
 
+```{r}
+rev_code_seq <-"GATCATCACGAAGGCGTGGGCGGTCACGATCACGTTGTACAGCTGGTCGTCGCCCAGCAG
+CATCAGGGGCACCAGCCAGTTGCCGAAGCCGCCGATCAGGATGGGCATCACCATGAAGAA
+GGGCAGCATCCAGAAGCTCAGGTTGTTCAGCCTGGGGAAGGCCATGTCGGGGGCGCCCAG
+CCAGCCGGTGCCCACGCCGCTCTCCACCATGCTGCTGGCCACCAGCAGGGTCAGGCTGGG
+GGCCAGGTCCACGCTGGGGCCGGCGTGGGCGATGGCGGCGCTCAGGGGGGGGTACACGGT
+GGTGATGAAGTTCACGGCGCCCAGGATGCTGCTGATGCCGGCCAGGTGCAGGCTGAAGAT
+CCAGGCGAACAGGGGCATCCTGTCCAGGCTCATGCTGTGGGGCCTCATGTTGATCACGGT
+NNNGGCCAGCACGGGCAGGCTCAGCAGCAGCAGCACGGCGGTGATCACCACGGC"
 
+paste('The reversed coding strand:',rev_code_seq)
+branchipus_5 <- read.fasta('emboss_backtranambig-I20241115-134739-0310-88748183-p1m.fasta')
 
+print(branchipus_5)
 
+```
 
-
-
-
-
-
-
-
+Does not look close to the true sequence have in the fasta file were supposed to save. 
 
 
 \newpage
@@ -252,8 +258,7 @@ https://en.wikipedia.org/wiki/Promoter_(genetics)), the the first exon, first in
 through different exons used, see https://en.wikipedia.org/wiki/Alternative_splicing)
 of mRNAs can make it difficult to identify genes. Finding genes and how they are organized
 is often due to searching for similar nucleotide sequences within already know protein amino
-acids, or rather their nucleotide sequences and the corresponding full–length cDNAs (complementary DNA—DNA synthesized from a single stranded RNA, see https://en.wikipedia.
-org/wiki/Complementary_DNA). cDNAs come from back transcription (reverse–transcription)
+acids, or rather their nucleotide sequences and the corresponding full–length cDNAs (complementary DNA—DNA synthesized from a single stranded RNA, see https://en.wikipedia.org/wiki/Complementary_DNA). cDNAs come from back transcription (reverse–transcription)
 of mRNAs and hence are without introns—and can be considered as equivalent to mRNA sequences. Comparing a part of the genome (that contains introns) with its cDNA will show the
 introns’ start and end points. GenBank (https://www.ncbi.nlm.nih.gov/genbank/) contains
 both cDNA sequences and corresponding genomic sequences (if available). If order to discover
@@ -270,21 +275,39 @@ identity—then consider the percent coverage.
 Read up on C. elegans and in a few sentences describe it and why it is such an important
 organism for the scientific community.
 
+C. elegans is a kind of a small, transparent, nematode or roundworm, feeding on microorganisms and it can mate both with males and through self-fertilization. The research started on C elegans as it has multiple advantageous attributes like its transparency, short life span(easy to follow from egg to death) and relative small genome that reproduces quickly. 
+
+
+
 ## Question 3.2
 
+```{r}
+c_el <- read.fasta('732A51_BioinformaticsHT2024_Lab01Ex03.fasta')
+
+#print(c_el)
+```
+
+
 Use the nucleotide BLAST tool to construct a schematic diagram that shows the arrangement
-of introns and exons in the genomic sequence. In the BLAST tool, https://blast.ncbi.nlm.
-nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch, choose database RefSeq Genome Database and
-remember that the species source of the genomic sequence is Caenorhabditis elegans. Use the
-Genome Data Viewer button. Alternatively you may use https://wormbase.org/tools/blast_
-blat.
+of introns and exons in the genomic sequence. In the BLAST tool, https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch, choose database RefSeq Genome Database and remember that the species source of the genomic sequence is Caenorhabditis elegans. Use the Genome Data Viewer button. Alternatively you may use https://wormbase.org/tools/blast_blat.
+
+[*Link to the results (old version)*](https://wormbase.org/tools/genome/jbrowse-simple/?loc=III%3A10332817..10339656&data=data%2Fc_elegans_PRJNA13758&addTracks=%5B%7B%22label%22%3A%22Hits%22%2C%22type%22%3A%22JBrowse%2FView%2FTrack%2FCanvasFeatures%22%2C%22store%22%3A%22url%22%2C%22subParts%22%3A%22match_part%22%2C%22glyph%22%3A%22JBrowse%2FView%2FFeatureGlyph%2FSegments%22%7D%5D&tracks=Curated_Genes%2CHits%2CClassical_alleles%2CPolymorphisms&addFeatures=%5B%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A2834273%2C%22end%22%3A13779597%2C%22name%22%3A%22Hits%22%2C%22type%22%3A%22match%22%2C%22subfeatures%22%3A%5B%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A10335816%2C%22end%22%3A10336655%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A10336730%2C%22end%22%3A10337518%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A10335160%2C%22end%22%3A10335740%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A10754307%2C%22end%22%3A10754423%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A10804581%2C%22end%22%3A10804675%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A11981205%2C%22end%22%3A11981321%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A2834273%2C%22end%22%3A2834353%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A11751025%2C%22end%22%3A11751105%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A11927428%2C%22end%22%3A11927508%2C%22type%22%3A%22match_part%22%7D%2C%7B%22seq_id%22%3A%22III%22%2C%22start%22%3A13779517%2C%22end%22%3A13779597%2C%22type%22%3A%22match_part%22%7D%5D%7D%5D&highlight=)
+
+Good match with chromosome 3 with a score of 1576 compared to the second highest of chromosome 1 with a score of 143.
 
 ## Question 3.3
 
 How are the sequences numbered in the alignment (i.e., pairing of query and database sequences)?
 Are the directions the same? What would happen if you reverse complement your query
-sequence (e.g., http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.html or http://www.bioinformatics.nl/cgi-bin/emboss/revseq or write your own code)
-and do the search with such a reverse complemented sequence?
+sequence (e.g., http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.html or http://www.bioinformatics.nl/cgi-bin/emboss/revseq or write your own code) and do the search with such a reverse complemented sequence?
+
+The sequences seems to be numbered after the chromosome’s coordinate system, where the start and end positions of the alignment are specific to the reference genome's coordinate structure.
+
+```{r,eval=FALSE }
+# reversed and complement
+"AATAAAAGAACCGTTTTTTTTGTTGTTGTAGAGAGAAAACAATTTGAAAAAAATAAATACAAAGTCGCGTACGCGTACAGGAATTTGGGGGGAGTTGGAAGAGGCCACACGAAAAGAGACAGTTAAAGTGAAGATGAATTATTGAGATACAGGGGTACTTTGGAAATGTGGAAGAGAAGCGGGAGGCTAGGCCACGGCGAGAAAAGTTAGGGTTTCAGGGTTTTTGACGAAATGTACAGAACACGGAAAAGTTGATATTACGCGGAAGTAGGGTTTGGCCAAAAAAAAAGGCAATCGGAAAAAATTGCAGTAAAATCGTAAATCGACACAGAGAGCCGTAATTTGTGGCCTAGCTTTCCCACTTCTTCCAGTTCAAAGGATGAGAGAATCAGTGAGCAAAAATGAGATTCAAATGTAAGGAGTTGTACATAAATTAATTATTTACACAAATTGAATACGTTACTTCAAGCTGAACATCATCCGCCCACACACGACGACTCCAACGATTCCAATGGCTCCAGCTGTTACTCCAGCGCCAATCATCGACCACCGTCTGTTCTGCTTCCGGCGTCCCACTTTTTCAGCTTCTGCTCGTTCGTAGTCCTCTTTCATTTGTTTTCCGAGTGTCATGAAGTCGTCCTGCAATTTTTTTCTTGATTTTTTATTTTCACAAATAATGCTTTAGAGCATATTCCGGGGAACACAAAAATCCGTGAATGCGTATTTCACAACATATTTGAGGCGGAAATATCTCGTAGCGAAAACTACAGTAATTCTTTAAATGCCTACTGTAGTCGATTTACGGGCTCGATTTTTGAAATTAATTTCTTTTGATTAGTGGTTATTTTCTTTAATTGTAAAAATTTTAAAAATTTAAAGAATTACTGTAGTTTTCTCTACTGGATATTTTGCGCGTCAAATATGTTGTGAAATACGCATTCTGCGAATTTTGTATTCCCGTAACAATAACATTATCATAAACAGTAATATACTTGAATATGTTTCCAGCTGTCCCCCCAAGAGGCTACCGAACCCTGTAATTATCGGCTTACCAACACCCCGGGAAGTCAAGGGTACTAGGGAAAGGGGGATATTGACTTCTAATGTCTATGCAAATACTCCTTACCCAGCTCCGATTGTGTTCCTTCCAGTTGTTGCGGATCCGCGTTTTGATGAACAGCGATGTGTAAACGAAGAGGTTTCGCACTTGTCCCTGCAGTTCCACGGATTCCATCATTTTTGCAGCTACGAAACCGCCGAACGAGATTAGACCTATCTGAAAATTAGAAATTTGCAATTTAATTCGTTCATTTCTGGCGGAAAATTAAGCTTAAAAAAACGATTTTTCTGGTTTTTAATGTTCGAAAATTGAATTTTTGGGGTTTTTCGTTCAGCAAATCAGCAGAAAAACCTGTTTTTCGAAGAAAAAAGTTCAAAAATCGAATTTTAATGTATTTTCCACAAATTTTACATTTAAAAACCGATTTTTGATAAATCAGCAGATCTTTTTCGCAAATACAAATCAAGGAAAATATGCTTTAAAAATATTCGAATAGAAAATAACGTTTTTAATCGAATTCGTAAAGTTTTCTGCTAATTTATCAACAAAAAAAATTACAATCCGGGATCAAAATTCGTGGTTTTTTAATGGAAAACTTTCAAAAAAGACACATAATTGGGCTATTTTTGACCAAGTTTTGCTGATTTCCTGAAGGAAAACAAACAATTTTTGCAAATGTTTTTTCTGCCACCTTTCTGGCGAATTTTCGAATTTTTGCAAACTTTTTTTCAGTATTTTCTCCCTTACCAAACGTCCATAAGACATTGGACATTGATCTGTCTGTGCATTTCCAACCGTCCGAACCACATCCTGATACAGTGAAAATGAGATTCTGGGCACTGCGAGCAGCTGCTCACAGAAGGTCTCAAAATTTTCCGCGTGCTTCTTCTCGAATATCGTTCCCATAACTCGCATCATTTCGTGCTCCGGTTGCACTCCACACGGCAATCCCGGTGCTCCAAACCATTCCATTCCGTTTTGCCGGATTCGGTGCGTGAAATAGTCGACCTGGAAGCAGCAGGAAATTTTATTTACAAAAAAAAATTAAAAAATTACCACAAATCCCTCGATATCAAGCCTTGGCTCTTCCCAATCATTGATTTTTCCATCAATTGACTCTCCGATGGACATTCTTCGCGTCGAAGCCTGCCTACTCGGTGATGGCAAGTCCTGAGCATCACTATTGATTCCAAAATCGGTGGGCTCTGTGCCTTTTATCCCCAGAAACTCCTTCATCTCGCCAGTCGCCATCGTTCGTCGCCGATACGCCGGATTCGTCAGCGAGTTGTCCGCCGTGCAGCGTGTCATCTAAAATTTTTA"
+```
+
 
 ## Question 3.4
 
