@@ -90,7 +90,12 @@ We look at the MN blood group (https://en.wikipedia.org/wiki/MNS_antigen_system)
 
 chi– square goodness of fit test:
 
-$$ \sum \fraq{(O_i - E_i)^2}{E_i} $$
+$$ \chi ^2 = \sum \frac{(O_i - E_i)^2}{E_i} $$
+
+$$df = 3 -1 $$
+
+$$p-value = P (\chi ^2 > Observed \chi ^2)$$
+
 
 
 
@@ -135,8 +140,7 @@ In this exercise, you will use GenBank (https://www.ncbi.nlm.nih.gov/genbank/) w
 default “Nucleotide” database. We will be interested in the sequence with accession number in
 GenBank: MK465080. You will find the relevant information in the FEATURES section of the
 returned record and access the nucleotides of the sequence under CDS (protein coding sequence,
-from CoDing Sequence). Remember that the coding strand (https://en.wikipedia.org/wiki/
-Coding_strand) is the strand of the gene that is identical to the transcript (see the lecture slides
+from CoDing Sequence). Remember that the coding strand (https://en.wikipedia.org/wiki/Coding_strand) is the strand of the gene that is identical to the transcript (see the lecture slides
 for the genetic code—translation of DNA triples to amino acids). The complimentary to it strand
 is called the template strand.
 
@@ -144,23 +148,99 @@ is called the template strand.
 
 From what species does the sequence come from? Name the protein product of the CDS.
 
+
+The protein product of the CDS is "cytochrome c oxidase subunit I"(COI) and the species is branchipus schaefferi, which seem to be a kind of crustacean.
+
 ## Question 2.2
 
+```{r}
+# importing fasta file
+library(seqinr)
+branchipus <- read.fasta('branchipus_schaefferi.fasta')
+
+sequance <- branchipus$MK465080.1
+print(branchipus)
+
+```
+
+
 Save (and submit) the nucleotide sequence of the coding strand that corresponds to these amino
-acids as a FASTA format file.. Use transeq (https://www.ebi.ac.uk/Tools/st/emboss_
-transeq/) to translate the nucleotides to a protein. Do you obtain the same protein sequence?
+acids as a FASTA format file.. Use transeq (https://www.ebi.ac.uk/Tools/st/emboss_transeq/) to translate the nucleotides to a protein. Do you obtain the same protein sequence?
 Check what is the ORF and codon table (these are provided by GenBank in the FEATURES
 section). Use backtranseq (https://www.ebi.ac.uk/Tools/st/emboss_backtranseq/) to obtain the sequence from the protein sequence.
+
+Using frame 2 and codon table 5 'Invertebrate Mitochondrial'.
+
+```{r}
+library(stringr)
+branchipus_2 <- read.fasta('emboss_transeq-I20241115-093926-0606-64392434-p1m.fasta')
+
+print(branchipus_2)
+seqq <- branchipus_2$MK465080.1_2
+
+true_seq <- str_split(tolower("LLGDDQLYNVIVTAHAFVMIFFMVMPILIGGFGNWLVPLMLGAPDMAFPRLNNLSFWMLPPSLTLLVASSMVESGVGTGWTVYPPLSAAIAHAGPSVDLAIFSLHLAGISSILGAVNFITTVINMRPHSMSLDRMPLFAWAVVITAVLLLLSLPVLA"),'')[[1]]
+
+print(true_seq==seqq)
+
+
+
+```
+
+We  get the same protein sequence as this is the sequence from https://www.ncbi.nlm.nih.gov/nuccore/MK465080 .
+
+"LLGDDQLYNVIVTAHAFVMIFFMVMPILIGGFGNWLVPLMLGAPDMAFPRLNNLSFWMLPPSLTLLVASSMVESGVGTGWTVYPPLSAAIAHAGPSVDLAIFSLHLAGISSILGAVNFITTVINMRPHSMSLDRMPLFAWAVVITAVLLLLSLPVLA"
+
+Then in the end of the sequence we got there is an X which i guess is a stop codon.
+
+To use backtranseq we could'nt find the correct codon table so we use 'Homo ' Sapiens' and got the following results. 
+
+```{r}
+branchipus_3 <- read.fasta('emboss_backtranseq-I20241115-101532-0798-77094578-p1m.fasta')
+
+
+print(branchipus_3)
+
+
+
+```
+
+We get a different sequence compared to the one we saved from https://www.ncbi.nlm.nih.gov/nuccore/MK465080.1?report=fasta.
 
 ## Question 2.3
 
 Compare your obtained coding strand sequence with the nucleotide sequence provided (when
-following the CDS link). Are they the same or do they differ? Try reversing and taking the complement (e.g., http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.
-html or http://www.bioinformatics.nl/cgi-bin/emboss/revseq or write your own code)
-of the your coding strand DNA. Consider also backtranseqambiq (https://www.ebi.ac.uk/
-Tools/st/emboss_backtranseqambig/ and check if the resulting nucleotide sequence is compatible with the true one. Do not forget to check the codon table. Explain what happened and
+following the CDS link). Are they the same or do they differ? Try reversing and taking the complement (e.g., http://arep.med.harvard.edu/labgc/adnan/projects/Utilities/revcomp.html or http://www.bioinformatics.nl/cgi-bin/emboss/revseq or write your own code)
+of the your coding strand DNA. Consider also backtranseqambiq (https://www.ebi.ac.uk/Tools/st/emboss_backtranseqambig/ and check if the resulting nucleotide sequence is compatible with the true one. Do not forget to check the codon table. Explain what happened and
 why. Save (and submit) the nucleotide sequence of the template strand that corresponds to these
 amino acids as a FASTA format file.
+
+# Här ska det in mer kod typ reversing och complement
+
+
+Results from backtranseqambiq with codon table 5 'Invertebrate Mitochondrial'.
+
+```{r}
+branchipus_3 <- read.fasta('emboss_backtranambig-I20241115-101314-0071-49255505-p1m.fasta')
+
+print(branchipus_3)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \newpage
 
