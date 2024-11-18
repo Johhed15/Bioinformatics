@@ -56,7 +56,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, fig.width = 6
 
 
 ```{r}
-
+library(seqinr)
+library(stringr)
 ```
 
 
@@ -155,10 +156,10 @@ The protein product of the CDS is "cytochrome c oxidase subunit I"(COI) and the 
 
 ```{r}
 # importing fasta file
-library(seqinr)
+
 branchipus <- read.fasta('branchipus_schaefferi.fasta')
 
-sequance <- branchipus$MK465080.1
+sequence <- branchipus$MK465080.1
 print(branchipus)
 
 ```
@@ -172,11 +173,11 @@ section). Use backtranseq (https://www.ebi.ac.uk/Tools/st/emboss_backtranseq/) t
 Using frame 2 and codon table 5 'Invertebrate Mitochondrial'.
 
 ```{r}
-library(stringr)
-branchipus_2 <- read.fasta('emboss_transeq-I20241115-093926-0606-64392434-p1m.fasta')
 
-print(branchipus_2)
+branchipus_2 <- read.fasta('emboss_transeq-I20241115-093926-0606-64392434-p1m.fasta')
 seqq <- branchipus_2$MK465080.1_2
+print(seqq)
+
 
 true_seq <- str_split(tolower("LLGDDQLYNVIVTAHAFVMIFFMVMPILIGGFGNWLVPLMLGAPDMAFPRLNNLSFWMLPPSLTLLVASSMVESGVGTGWTVYPPLSAAIAHAGPSVDLAIFSLHLAGISSILGAVNFITTVINMRPHSMSLDRMPLFAWAVVITAVLLLLSLPVLA"),'')[[1]]
 
@@ -198,8 +199,8 @@ To use backtranseq we couldn't find the correct codon table so we use 'Homo ' Sa
 branchipus_3 <- read.fasta('emboss_backtranseq-I20241115-101532-0798-77094578-p1m.fasta')
 
 code_seq <- branchipus_3$MK465080.1_2
-print(branchipus_3)
-code_seq
+print(code_seq)
+
 
 
 ```
@@ -220,7 +221,7 @@ Results from backtranseqambiq with codon table 5 'Invertebrate Mitochondrial'.
 ```{r}
 branchipus_4 <- read.fasta('emboss_backtranambig-I20241115-101314-0071-49255505-p1m.fasta')
 
-print(branchipus_4)
+print(branchipus_4$MK465080.1_2)
 
 ```
 
@@ -228,20 +229,21 @@ print(branchipus_4)
 
 Results from backtranseqambiq with codon table 5 'Invertebrate Mitochondrial', reverse and complemented sequence.
 
-```{r}
-rev_code_seq <-"GATCATCACGAAGGCGTGGGCGGTCACGATCACGTTGTACAGCTGGTCGTCGCCCAGCAG
+"""GATCATCACGAAGGCGTGGGCGGTCACGATCACGTTGTACAGCTGGTCGTCGCCCAGCAG
 CATCAGGGGCACCAGCCAGTTGCCGAAGCCGCCGATCAGGATGGGCATCACCATGAAGAA
 GGGCAGCATCCAGAAGCTCAGGTTGTTCAGCCTGGGGAAGGCCATGTCGGGGGCGCCCAG
 CCAGCCGGTGCCCACGCCGCTCTCCACCATGCTGCTGGCCACCAGCAGGGTCAGGCTGGG
 GGCCAGGTCCACGCTGGGGCCGGCGTGGGCGATGGCGGCGCTCAGGGGGGGGTACACGGT
 GGTGATGAAGTTCACGGCGCCCAGGATGCTGCTGATGCCGGCCAGGTGCAGGCTGAAGAT
 CCAGGCGAACAGGGGCATCCTGTCCAGGCTCATGCTGTGGGGCCTCATGTTGATCACGGT
-NNNGGCCAGCACGGGCAGGCTCAGCAGCAGCAGCACGGCGGTGATCACCACGGC"
+NNNGGCCAGCACGGGCAGGCTCAGCAGCAGCAGCACGGCGGTGATCACCACGGC"""
 
-paste('The reversed coding strand:',rev_code_seq)
+
+```{r}
+
 branchipus_5 <- read.fasta('emboss_backtranambig-I20241115-134739-0310-88748183-p1m.fasta')
 
-print(branchipus_5)
+print(branchipus_5$MK465080.1)
 
 ```
 
