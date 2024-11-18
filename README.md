@@ -29,5 +29,5 @@ Lab 4 -
 Lab 5 - 
 
 <div align="center">
-  <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNm01cnJrdXdjYXMzb3Rsb2UzYnI3eGo0ajRncTkxbTFlaXVkNDJ3YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKLC8zBUd7eEteE/giphy.webp" width="600" height="300" alt="DNA Animation"/> 
+  <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNm01cnJrdXdjYXMzb3Rsb2UzYnI3eGo0ajRncTkxbTFlaXVkNDJ3YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKLC8zBUd7eEteE/giphy.webp" width="400" height="600" alt="DNA Animation"/> 
 </div>
