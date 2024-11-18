@@ -1,7 +1,7 @@
 # Bioinformatics
 This repository contains the labs from a Bioinformatics course on Linköping Universitet 
 
-## Lecture Schedule
+## Lectures
 
 | Lecture | Topics                                                                                             
 |---------|-----------------------------------------------------------------------------------------------------
