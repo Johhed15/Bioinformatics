@@ -18,11 +18,11 @@ This repository contains the labs from a Bioinformatics course on Linköping Uni
 
 ## labs 
 
-Lab 1 -  Hardy–Weinberg equilibrium abd exploring a genomic sequence
+Lab 1 -  Hardy–Weinberg equilibrium and exploring a genomic sequence
 
 Lab 2 -  DNA sequence acquisition and simulation, Sequence analysis and Phylogeny reconstruction
 
-Lab 3 - 
+Lab 3 -  Phylogeny comparative models
 
 Lab 4 - 
 
