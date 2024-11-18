@@ -31,3 +31,8 @@ Lab 5 -
 <div align="center">
   <img src="https://tenor.com/view/science-dna-replication-gif-10400908" width="600" height="300" alt="DNA Replication Animation"/> 
 </div>
+
+
+<div align="center">
+  <img src="https://media.tenor.com/v1TR0x3f9hoAAAAd/dna-bioinformatics.gif" width="600" height="300" alt="Bioinformatics Animation"/>
+</div>
