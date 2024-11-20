@@ -83,7 +83,13 @@ $$P(Aa) = 2pq$$
 
 $$P(aa) = q^2$$
 
-When its random mating the proportions will always stay the same for the next generation.
+$$p_{offspring} = p$$
+
+$$q_{offspring} = q$$
+
+
+
+When its random mating the proportions will always stay the same for the next generation because the allele frequencies are preserved.
 
 ## Question 1.2
 
@@ -130,7 +136,7 @@ p_value <- 1 - pchisq(chi_sq_statistic, df)
 p_value
 ```
 
-The p-value is very high, which indicates that there is no significant statistaical difference between the groups, we cant reject that the population is in Hardy–Weinberg equilibrium. 
+The p-value is very high, which indicates that there is no significant difference between the groups and we cant reject that the population is in Hardy–Weinberg equilibrium. 
 
 \newpage
 
@@ -269,8 +275,7 @@ GGNACNGGNGCNACNTGYGCNTGYTGYGCNTGYGGNGGNTGY"
 
 
 
-Does not look close to the true sequence have in the fasta file were supposed to save. 
-
+Does not look close to the true sequence have in the fasta file were supposed to save. The reason we think is behind this is that the codon table that we have used does not correspond to the protein sequence of the species, making it fail at transcribing the nucleotide sequence to the correct sequence. We also gets lots of N's, this is because backtranseqambiq tries to cover all possible codon options, as N stands for any nucleotide (A,T,G,C), Y also stand for either Cytosine or Thymine, these ambiguities make the resulting sequence less specific and harder to compare directly with the true nucleotide sequence.
 
 \newpage
 
