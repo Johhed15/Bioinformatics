@@ -82,7 +82,7 @@ print(lizards_sequences)
 ```{r}
 #library(help = ape)
 #library(help = seqinr)
-
+set.seed(123456790)
 #ape::as.character.DNAbin(lizards_sequences[[1]])
 
 artif_dna_seq <- function(org_seq){
@@ -101,11 +101,12 @@ artif_dna_seq <- function(org_seq){
 
 artif_liz_seq <- artif_dna_seq(lizards_sequences)
 # save dataset as fasta
-#seqinr::write.fasta(sequences =artif_liz_seq, names = names(artif_liz_seq), file.out = "artifical_lizard_seqs.fasta")
+#seqinr::write.fasta(sequences =artif_liz_seq, 
+#                    names = names(artif_liz_seq), 
+#                    file.out = "artifical_lizard_seqs.fasta")
 
 # report on base composition
 artif_liz_seq_DNAbin <- as.DNAbin(artif_liz_seq)
-
 
 seq_compare <- rbind(base.freq(lizards_sequences),base.freq(artif_liz_seq_DNAbin))
 rownames(seq_compare) <- c("Lizards sequences", "Artif. lizards sequences")
