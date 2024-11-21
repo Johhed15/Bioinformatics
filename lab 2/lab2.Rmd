@@ -61,7 +61,13 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, fig.width = 6
 ```{r}
 library(ape)
 library(seqinr)
-
+library(Biostrings)
+#install.packages("pheatmap")
+#BiocManager::install("DECIPHER")
+library(DECIPHER) # using deciper to align sequences
+library(ggplot2)
+library(pheatmap)
+library(stringdist)
 ## Gene bank accession numbers taken from http://www.jcsantosresearch.org/Class_2014_Spring_Comparative/pdf/week_2/Jan_13_15_2015_GenBank_part_2.pdf
 lizards_accession_numbers <- c("JF806202", "HM161150", "FJ356743", "JF806205", 
                                "JQ073190", "GU457971", "FJ356741", "JF806207",
@@ -213,7 +219,50 @@ The number of stop codons in the simulated sequence for JF806202 after translati
 *Align your sequences using software of your choice (a starter for R: https://stackoverflow.com/questions/4497747/how-to-perform-basic-multiple-sequence-alignments-in-r, you can also look what Biopython, BioPerl offer, use the Clustal family of programs or something else of your choice). Choose a distance measure between sequences, calculate for each alignment the distances between all pairs of sequences. Then, plot heatmaps visualizing the distances. Comment on what you can observe.*
 
 
+## Question 2.3
 
+*Align your sequences using software of your choice (a starter for R: https://stackoverflow.com/questions/4497747/how-to-perform-basic-multiple-sequence-alignments-in-r, you can also look what Biopython, BioPerl offer, use the Clustal family of programs or something else of your choice). Choose a distance measure between sequences, calculate for each alignment the distances between all pairs of sequences. Then, plot heatmaps visualizing the distances. Comment on what you can observe.*
+
+```{r, message=FALSE}
+#BiocManager::install("msa")
+library(msa)
+library(stringdist)
+library(Biostrings)
+
+```
+
+
+```{r}
+# align 
+true_msa <- msaClustalW('lizard_seqs.fasta', type='dna')
+sim_msa <-  msaClustalW('artifical_lizard_seqs.fasta', type='dna')
+
+# Convert MultipleAlignment object to a character vector
+#true_seqs <- as.character(true_msa)
+#sim_seqs <- as.character(sim_msa)
+
+# this took too much time
+#true_dist <- stringdistmatrix(true_seqs, true_seqs, method = "lv")
+#sim_dist <- stringdistmatrix(sim_seqs, sim_seqs, method = "lv")
+ 
+# converting to seqinr object
+true_seqs <- msaConvert(true_msa,type='seqinr::alignment')
+sim_seqs <- msaConvert(sim_msa,type='seqinr::alignment')
+
+# distance matrices
+true_dist <- as.matrix(dist.alignment(true_seqs),'identity')
+sim_dist <-   as.matrix(dist.alignment(sim_seqs),'identity')
+ 
+heatmap(true_dist)
+
+```
+
+
+```{r}
+
+# Create a heatmap
+heatmap(sim_dist)
+```
 \newpage
 
 # Phylogeny reconstruction
