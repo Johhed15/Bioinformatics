@@ -61,7 +61,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, fig.width = 6
 ```{r}
 library(ape)
 library(seqinr)
-<<<<<<< HEAD
+
 library(Biostrings)
 #install.packages("pheatmap")
 #BiocManager::install("DECIPHER")
@@ -69,10 +69,10 @@ library(DECIPHER) # using deciper to align sequences
 library(ggplot2)
 library(pheatmap)
 library(stringdist)
-=======
+
 library(phangorn)
 
->>>>>>> cb5d5b074a46f086c57d71f44db7c350bd759094
+
 ## Gene bank accession numbers taken from http://www.jcsantosresearch.org/Class_2014_Spring_Comparative/pdf/week_2/Jan_13_15_2015_GenBank_part_2.pdf
 lizards_accession_numbers <- c("JF806202", "HM161150", "FJ356743", "JF806205", 
                                "JQ073190", "GU457971", "FJ356741", "JF806207",
@@ -361,6 +361,8 @@ heatmap(true_dist)
 # Create a heatmap
 heatmap(sim_dist)
 ```
+
+
 \newpage
 
 
