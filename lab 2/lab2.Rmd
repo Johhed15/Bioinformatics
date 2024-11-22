@@ -62,14 +62,6 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, fig.width = 6
 library(ape)
 library(seqinr)
 
-library(Biostrings)
-#install.packages("pheatmap")
-#BiocManager::install("DECIPHER")
-library(DECIPHER) # using deciper to align sequences
-library(ggplot2)
-library(pheatmap)
-library(stringdist)
-
 library(phangorn)
 
 
@@ -257,9 +249,13 @@ dna_stats <- function(seq){
   dinucleotides <- substring(sequence_str, 1:(nchar(sequence_str) - 1), 2:nchar(sequence_str))
   # Counting the dinucleotide
   counts <- table(dinucleotides)
+  
   # Calculate CpG content 
-  CpG <- counts['cg'] / sum(counts) 
-
+  if('cg' %in% names(counts)){ # to be sure that 'cg' is in the sequence
+    CpG <- counts['cg'] / sum(counts) 
+  } else {
+    CpG = 0
+  }
   base_comp <- base.freq(seq[1]) # base comp 
   GC <- GC.content(seq[1]) # GC and AT content
   AT <- 1 - GC
@@ -278,6 +274,38 @@ knitr::kable(df)
 ```
 
 The proportions for the different stats looks to be close to the same for the specie JF806202 except for the CpG which is much higher for the artificial.
+
+
+```{r}
+
+df1 <- matrix(0,ncol=8,nrow=33)
+df2 <- matrix(0,ncol=8,nrow=33)
+for(i in 1:33){
+df1[i,] <- dna_stats(lizards_sequences[i])
+df2[i,] <- dna_stats(artif_liz_seq_DNAbin[i])
+}
+
+df1 <- as.data.frame(df1)
+df2 <- as.data.frame(df2)
+
+colnames(df1)[2:8] <-c('a','c','g','t','GC','AT', 'CpG') 
+df1[ , 2:8] <- sapply(df1[ , 2:8], as.numeric)
+df1[ , 2:8] <- round(df1[ , 2:8], digits = 5)
+colnames(df2)[2:8] <-c('a','c','g','t','GC','AT', 'CpG') 
+df2[ , 2:8] <- sapply(df2[ , 2:8], as.numeric)
+df2[ , 2:8] <- round(df2[ , 2:8], digits = 5)
+
+
+mean1 <- colMeans(df1[,2:8])
+mean2 <- colMeans(df2[,2:8])
+df3 <- rbind(mean1, mean2)
+
+rownames(df3) <- c('Mean of true sequences', 'Mean of sampled sequences')
+
+knitr::kable(df3)
+
+# df3[,2]*df3[,3] expected cG
+```
 
 
 
@@ -301,6 +329,7 @@ protein_sequences <- lapply(1:33, function(i) translate_sequences(lizards_sequen
 print(protein_sequences[1])
 
 
+
 ```
 
 
@@ -315,6 +344,20 @@ table(sim$ARTIFICAL_JF806202_1)
 The number of stop codons in the simulated sequence for JF806202 after translations to proteins are 20, which can be seen as the number below the star(*) in the table above. The true sequence have 0 stop codons, the difference here is that in the simulated sequence there is a possibility to sample nucleotides that create stop codons( TAA, TAG, and TGA) without any constraints which there is likely to be for the true sequence where the coding regions are complete and translated into functional proteins. 
 
 
+```{r}
+freq_all <- sapply(protein_sequences, function(x) x$protein) # picking out only protein
+
+freq_true <- table(unlist(freq_all))
+
+knitr::kable(t(freq_true), caption='Amino acid frequency for all true sequences')
+```
+
+
+```{r}
+freq_sim <- table(unlist(sim))
+
+knitr::kable(t(freq_sim), caption='Amino acid frequency for all simulated sequences')
+```
 
 
 ## Question 2.3
