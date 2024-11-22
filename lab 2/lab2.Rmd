@@ -250,7 +250,7 @@ dna_stats <- function(seq){
   # Counting the dinucleotide
   counts <- table(dinucleotides)
   
-  # Calculate CpG content 
+  # Calculate CpG content (C followed by G)
   if('cg' %in% names(counts)){ # to be sure that 'cg' is in the sequence
     CpG <- counts['cg'] / sum(counts) 
   } else {
@@ -373,37 +373,52 @@ library(Biostrings)
 ```
 
 
+Identity measure:
+
+$$Distance = 1 - \frac{\text{Number of identical positions}}{\text{Total number of positions}}$$
+
+where a distance of 0 = identical and 1 is no identical positions.
+
 ```{r}
-# align 
-true_msa <- msaClustalW('lizard_seqs.fasta', type='dna')
-sim_msa <-  msaClustalW('artifical_lizard_seqs.fasta', type='dna')
+# align with MUSCLE as its quite fast and good for dna sequenecs
+true_msa <- msa('lizard_seqs.fasta','Muscle'  ,type='dna')
+sim_msa <-  msa('artifical_lizard_seqs.fasta','Muscle', type='dna')
 
 # Convert MultipleAlignment object to a character vector
 #true_seqs <- as.character(true_msa)
 #sim_seqs <- as.character(sim_msa)
 
-# this took too much time
+# this took too much time (Levenshtein Distance)
 #true_dist <- stringdistmatrix(true_seqs, true_seqs, method = "lv")
 #sim_dist <- stringdistmatrix(sim_seqs, sim_seqs, method = "lv")
  
-# converting to seqinr object
+# converting to seqinr object of class alignment
 true_seqs <- msaConvert(true_msa,type='seqinr::alignment')
 sim_seqs <- msaConvert(sim_msa,type='seqinr::alignment')
 
-# distance matrices
-true_dist <- as.matrix(dist.alignment(true_seqs),'identity')
-sim_dist <-   as.matrix(dist.alignment(sim_seqs),'identity')
- 
-heatmap(true_dist)
+#  identity for distance matrices and not similarity
+# and identity is also then the measure
+true_dist <- as.matrix(dist.alignment(true_seqs,'identity'))
+sim_dist <-   as.matrix(dist.alignment(sim_seqs,'identity'))
+
+
+
+# changing color scale so its easier to compare the graphs
+color_palette <- colorRampPalette(c('yellow', 'purple'))(100)
+                                  
+heatmap(true_dist,col=color_palette, breaks=seq(0,1,length.out=101), scale='none')
 
 ```
 
+Low scores overall, small clusters of a bit more similar sequences like sequence 25,26 and maybe 28(hard to see when not all axis labels are presented ).
 
 ```{r}
 
 # Create a heatmap
-heatmap(sim_dist)
+heatmap(sim_dist,col=color_palette, breaks=seq(0,1,length.out=101), scale='none')
 ```
+
+The simulated sequences are only similar to themselves and have a quite high score to every other sequences, the score is close to the same for all pairwise comparisons(drawn from the same probabilities so this is expected). It shows the lack of evolutionary complexity and diversity that naturally occur in biological data, the consistently low similarity scores within the true sequences highlight the genetic variability and evolutionary history that shape actual biological sequences.
 
 
 \newpage
