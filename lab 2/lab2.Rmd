@@ -379,7 +379,7 @@ $$Distance = 1 - \frac{\text{Number of identical positions}}{\text{Total number 
 
 where a distance of 0 = identical and 1 is no identical positions.
 
-```{r}
+```{r, cache = TRUE}
 # align with MUSCLE as its quite fast and good for dna sequenecs
 true_msa <- msa('lizard_seqs.fasta','Muscle'  ,type='dna')
 sim_msa <-  msa('artifical_lizard_seqs.fasta','Muscle', type='dna')
@@ -400,7 +400,6 @@ sim_seqs <- msaConvert(sim_msa,type='seqinr::alignment')
 # and identity is also then the measure
 true_dist <- as.matrix(dist.alignment(true_seqs,'identity'))
 sim_dist <-   as.matrix(dist.alignment(sim_seqs,'identity'))
-
 
 
 # changing color scale so its easier to compare the graphs
@@ -431,3 +430,47 @@ The simulated sequences are only similar to themselves and have a quite high sco
 
 *Construct (using algorithm and software of your choice) phylogenetic trees from the three multiple alignments (or distance matrices) done in Question 2.3. You might want to look at the functions offered by ape, phangorn (https://cran.r-project.org/web/packages/phangorn/vignettes/Trees.pdf) or go for some completely different software. Plot the inferred trees. Are the two based on the simulated data similar to expected? Perform a phylogenetic bootstrap analysis and report the bootstrap support for the individual clades, you can look at ape::boot.phylo().*
 
+```{r}
+# construct phylogenetic trees from the sequences in question 2.3
+true_dna <- as.DNAbin(true_seqs)
+sim_dna <- as.DNAbin(sim_seqs)
+true_dna_dist <- dist.dna(true_dna)
+sim_dna_dist <- dist.dna(sim_dna, model="raw")
+
+# using neighbor-join tree from ape
+true_tree <- nj(true_dna_dist)
+sim_tree <- nj(sim_dna_dist)
+```
+
+\pagebreak
+```{r, fig.height = 6, fig.cap ="True sequence left, simulated sequence right", echo = FALSE}
+# plot phylogenetic true & sim trees
+par(mfrow=c(1,2))
+plot.phylo(true_tree, main = "Neighbor-Joining trees")
+plot.phylo(sim_tree)
+```
+
+The simulated tree on the right from the simulated sequence is very different from the tree generated from the true sequence. This is expected as when calculating neighbor join trees, you construct new clustered nodes from just distance between tips. This differs from the true sequence which are derived from real evolutionary scenarios, which makes the sequences shaped by natural selection, regional constraints and other real world evolutionary settings.
+
+\pagebreak
+```{r, fig.height = 7, fig.cap ="True sequence left, simulated sequence right"}
+# phylogenetic bootstrap analysis
+f <- function(x) nj(dist.dna(x, model = "raw"))
+true_boot <- boot.phylo(true_tree,true_dna,f,B=1000)
+sim_boot <- boot.phylo(sim_tree,true_dna,f,B=1000)
+
+par(mfrow=c(1,2))
+plot.phylo(true_tree, main="Bootstrap trees")
+nodelabels(true_boot)
+plot.phylo(sim_tree)
+nodelabels(sim_boot)
+```
+
+```{r}
+boots <- rbind(true_boot,sim_boot)
+rownames(boots) <- c("T", "S")
+colnames(boots) <- 1:31
+knitr::kable(boots, caption = "Bootstrapped values for true and simulated sequences")
+```
+
+The bootstrap values show the proportion where specific group of specific clade appear in the bootstrapped trees. Generally the values are low for both sequences which indicates there is low support for the evolutionary relationship computed. 
