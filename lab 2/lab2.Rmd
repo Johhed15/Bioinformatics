@@ -127,7 +127,7 @@ Comparing the base compositions for the original lizards_sequences FASTA file an
 
 ## Question 1.2 
 
-*Simulate a second artificial DNA sequence dataset. It should contain 33 sequence. The lengthsof the sequences should be the same as in the lizard dataset, i.e. for each real sequence simulatean artificial one. First simulate a phylogenetic tree with 33 tips in phylo format (i.e. ape). Plotyour resulting tree. For simulating the tree explore the functions of the ape, TreeSim or other Rpackages. Choose a simulation function and model yourself.Now simulate sequences on this using e.g. phangorn::simSeq(). Choose the sequence lengthyourself, but try to make it so that it will be comparable with the original lizards dataset. Youneed to also specify the Q matrix|the transition rate matrix. Choose one yourself, howevertry to make the stationary distribution equal to the base composition (frequencies) of the lizardsequences (look at EG Ch. 14:3:3). If you cannot obtain such a transition matrix, choose someanother one. Save your dataset in a fasta format file. Remember to give unique names to yoursequences. Report on the base composition in your simulated data. Comment on if it is whatyou expect.*
+*Simulate a second artificial DNA sequence dataset. It should contain 33 sequence. The lengths of the sequences should be the same as in the lizard dataset, i.e. for each real sequence simulate an artificial one. First simulate a phylogenetic tree with 33 tips in phylo format (i.e. ape). Plot your resulting tree. For simulating the tree explore the functions of the ape, TreeSim or other Rpackages. Choose a simulation function and model yourself.Now simulate sequences on this using e.g. phangorn::simSeq(). Choose the sequence length yourself, but try to make it so that it will be comparable with the original lizards dataset. You need to also specify the Q matrix|the transition rate matrix. Choose one yourself, however try to make the stationary distribution equal to the base composition (frequencies) of the lizard sequences (look at EG Ch. 14:3:3). If you cannot obtain such a transition matrix, choose some another one. Save your dataset in a fasta format file. Remember to give unique names to your sequences. Report on the base composition in your simulated data. Comment on if it is whatyou expect.*
 
 ```{r}
 # simulate second artifical DNA seq with 33 sequences and same lengths
@@ -204,6 +204,7 @@ print(Q)
 # confirm the assumption holds
 phi %*% Q
 ```
+
 The Q-matrix constructed according to the Felsenstein model works good as a transition matrix, which is evident that the result is 0 or nearly 0 for all bases when computing $\vec{\phi_0} Q$.
 
 
@@ -257,16 +258,22 @@ dna_stats <- function(seq){
     CpG = 0
   }
   base_comp <- base.freq(seq[1]) # base comp 
-  GC <- GC.content(seq[1]) # GC and AT content
-  AT <- 1 - GC
+  GC <- GC.content(seq[1]) # GC 
+  
+  if('at' %in% names(counts)){ # to be sure that 'at' is in the sequence
+    ApT <- counts['at'] / sum(counts) 
+  } else {
+    ApT = 0
+  }
+ 
 
-  return(t(c('Species'=names(seq),base_comp[1],base_comp[2],base_comp[3],base_comp[4],GC,AT, CpG)))
+  return(t(c('Species'=names(seq),base_comp[1],base_comp[2],base_comp[3],base_comp[4],GC,ApT, CpG)))
 }
 
 df <- as.data.frame(dna_stats(lizards_sequences[1]))
 
 df <- rbind(df,dna_stats(artif_liz_seq_DNAbin[1]))
-colnames(df)[6:8] <-c('GC','AT', 'CpG') 
+colnames(df)[6:8] <-c('GC','ApT', 'CpG') 
 df[ , 2:8] <- sapply(df[ , 2:8], as.numeric)
 df[ , 2:8] <- round(df[ , 2:8], digits = 5)
 knitr::kable(df)
@@ -288,10 +295,10 @@ df2[i,] <- dna_stats(artif_liz_seq_DNAbin[i])
 df1 <- as.data.frame(df1)
 df2 <- as.data.frame(df2)
 
-colnames(df1)[2:8] <-c('a','c','g','t','GC','AT', 'CpG') 
+colnames(df1)[2:8] <-c('a','c','g','t','GC','ApT', 'CpG') 
 df1[ , 2:8] <- sapply(df1[ , 2:8], as.numeric)
 df1[ , 2:8] <- round(df1[ , 2:8], digits = 5)
-colnames(df2)[2:8] <-c('a','c','g','t','GC','AT', 'CpG') 
+colnames(df2)[2:8] <-c('a','c','g','t','GC','ApT', 'CpG') 
 df2[ , 2:8] <- sapply(df2[ , 2:8], as.numeric)
 df2[ , 2:8] <- round(df2[ , 2:8], digits = 5)
 
