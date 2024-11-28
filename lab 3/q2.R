@@ -4,7 +4,6 @@ data(carni70)
 
 data <- carni70$tab
 data$animal <- rownames(data)
-head(carni70$tab)
 
 # first rows in the dataframe
 knitr::kable(head(carni70$tab))
@@ -104,3 +103,73 @@ ggplot(data, aes(x = range_group)) +
 
 
 
+### Function to get pictures from google search 
+
+
+library(httr)
+library(jsonlite)
+
+api_key <- Sys.getenv("GOOGLE_API_KEY")
+cse_id <- Sys.getenv("GOOGLE_CSE_ID")
+
+# Function to search for an image using Google Custom Search API
+fetch_image_url <- function(query, api_key, cse_id) {
+  base_url <- "https://www.googleapis.com/customsearch/v1"
+  
+  # Make the API request
+  res <- GET(base_url, query = list(
+    q = query,
+    searchType = "image",
+    key = api_key,
+    cx = cse_id,
+    num = 1
+  ))
+  
+  # Parse the response
+  if (status_code(res) == 200) {
+    img_url <- fromJSON(content(res, "text"))$items$link
+    return(img_url)
+  } else {
+    warning("Failed to fetch image for: ", query)
+    return(NA)
+  }
+}
+
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # For RStudio users
+# Fetch image URLs for each outlier
+labels$image_url <- sapply(labels$animal, function(animal) {
+  query <- gsub("_", " ", animal) # Format the query
+  fetch_image_url(query, api_key, cse_id)
+})
+
+## key 
+lapply(labels$image_url, knitr::include_graphics)
+
+# Set the working directory to the folder containing the R script
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # For RStudio users
+
+# Download each image into the current working directory
+labels$image_path <- sapply(seq_along(labels$image_url), function(i) {
+  url <- labels$image_url[i]
+  name <- labels$animal[i]
+  
+  if (!is.na(url)) {
+    # Generate a safe filename
+    safe_name <- gsub(" ", "_", gsub("[^a-zA-Z0-9 ]", "", name))
+    file_path <- paste0(safe_name, ".jpg")
+    
+    # Download the file
+    tryCatch({
+      download.file(url, file_path, mode = "wb") # Binary mode for images
+      return(file_path)
+    }, error = function(e) {
+      warning("Failed to download image for: ", name, " with error: ", e$message)
+      return(NA)
+    })
+  } else {
+    return(NA)
+  }
+})
+
+# Print the paths to confirm successful downloads
+print(labels$image_path)
