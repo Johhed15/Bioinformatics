@@ -1,4 +1,4 @@
-install.packages("ade4")
+#install.packages("ade4")
 library(ade4)
 data(carni70)
 
