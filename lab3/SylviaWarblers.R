@@ -44,7 +44,7 @@ save(sylvia.clus, taxa.sylvia, sylvia.eco,
 ###
 ### Chapter 5
 ###
-sylvia.seq <- read.GenBank(x)
+sylvia.seq.ali<-sylvia.maff
 
 syl.K80 <- dist.dna(sylvia.seq.ali, pairwise.deletion = TRUE)
 syl.F84 <- dist.dna(sylvia.seq.ali, model = "F84", p = TRUE)
@@ -103,7 +103,7 @@ add.scale.bar(length = 0.01)
 write.tree(nj.est, "sylvia_nj_k80.tre")
 
 write.dna(sylvia.seq.ali, "sylvia.txt")
-phyml.sylvia <- phymltest("sylvia.txt", execname = "~/phyml")
+phyml.sylvia <- phymltest("sylvia.txt", execname = "C:/Users/johan/PhyML-3.1/PhyML-3.1/PhyML-3.1_win32.exe")
 summary(phyml.sylvia)
 plot(phyml.sylvia, col = "black")
 TR <- read.tree("sylvia.txt_phyml_tree.txt")
@@ -140,7 +140,7 @@ nj.est <- drop.tip(nj.est, "Chamaea_fasciata")
 DF <- sylvia.eco[nj.est$tip.label, ]
 table(DF$geo.range, DF$mig.behav)
 
-syl.er <- ace(DF$geo.range, nj.est, type = "d")
+syl.er <- ace(DF$geo.range, nj.est, type = "d") # model = 'GLS'
 syl.sym <- ace(DF$geo.range, nj.est, type="d", model="SYM")
 anova(syl.er, syl.sym)
 
