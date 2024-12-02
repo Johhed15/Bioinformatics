@@ -8,9 +8,25 @@ x <- paste("AJ5345", 26:49, sep = "")
 x <- c("Z73494", x)
 sylvia.seq <- read.GenBank(x)
 
+#system("wsl.exe mafft --version")
+
+
+
 sylvia.clus <- clustal(sylvia.seq)
-library(phyloch)
-sylvia.maff <- mafft(sylvia.seq)
+#remotes::install_github("fmichonneau/phyloch")
+
+# manually running mafft
+Sys.setenv(TMPDIR = "C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3")
+write.FASTA(sylvia.seq, file = "C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftin.fas")
+system("wsl.exe mafft --localpair --maxiterate 1000 /mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftin.fas > /mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftout.fas 2>/mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafft_error.log")
+
+sylvia.maff <- read.dna("C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftout.fas", format = "fasta")
+
+
+# /wsl.localhost/Ubuntu
+library(phyloch) # /usr/bin/mafft
+#sylvia.maff <- mafft(sylvia.seq, path='/usr/bin/mafft')
+
 identical(sylvia.clus[x, ], sylvia.maff[x, ])
 
 taxa.sylvia <- attr(sylvia.seq, "species")
@@ -19,7 +35,7 @@ rm(sylvia.seq)
 taxa.sylvia[1] <- "Sylvia_atricapilla"
 taxa.sylvia[24] <- "Sylvia_abyssinica"
 
-sylvia.eco <- read.table("sylvia_data.txt")
+sylvia.eco <- read.table("C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/sylvia_data.txt")
 str(sylvia.eco)
 rownames(sylvia.eco)
 save(sylvia.clus, taxa.sylvia, sylvia.eco,
@@ -28,6 +44,7 @@ save(sylvia.clus, taxa.sylvia, sylvia.eco,
 ###
 ### Chapter 5
 ###
+sylvia.seq <- read.GenBank(x)
 
 syl.K80 <- dist.dna(sylvia.seq.ali, pairwise.deletion = TRUE)
 syl.F84 <- dist.dna(sylvia.seq.ali, model = "F84", p = TRUE)
