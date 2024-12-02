@@ -62,6 +62,7 @@ Using the script http://ape-package.ird.fr/APER/APER2/SylviaWarblers.R obtain th
 ## The given code(with some changes to get it to work on Windows)
 
 ```{r, eval=FALSE}
+set.seed(12345)
 library(ape)
 #remotes::install_github("fmichonneau/phyloch")
 ###
@@ -80,16 +81,11 @@ sylvia.clus <- clustal(sylvia.seq)
 
 
 # manually running mafft
-Sys.setenv(TMPDIR = "C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3")
-write.FASTA(sylvia.seq, file = "C:/Users/johan/Desktop/Plugg/Statistik/
-            Bioinformatik/Bio/lab3/mafftin.fas")
+Sys.setenv(TMPDIR = "C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3")
+write.FASTA(sylvia.seq, file = "C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3/mafftin.fas")
+system("wsl.exe mafft --localpair --maxiterate 1000 /mnt/c/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3/mafftin.fas > /mnt/c/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3/mafftout.fas 2>/mnt/c/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3/mafft_error.log")
 
-system("wsl.exe mafft --localpair --maxiterate 1000 /mnt/c/Users/johan/Desktop/
-       Plugg/Statistik/Bioinformatik/Bio/lab3/mafftin.fas > /mnt/c/Users/johan/
-       Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftout.fas 2>/mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafft_error.log")
-
-sylvia.maff <- read.dna("C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/
-                        Bio/lab3/mafftout.fas", format = "fasta")
+sylvia.maff <- read.dna("C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3/mafftout.fas", format = "fasta")
 
 
 # /wsl.localhost/Ubuntu
@@ -104,8 +100,7 @@ rm(sylvia.seq)
 taxa.sylvia[1] <- "Sylvia_atricapilla"
 taxa.sylvia[24] <- "Sylvia_abyssinica"
 
-sylvia.eco <- read.table("C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/
-                         Bio/lab3/sylvia_data.txt")
+sylvia.eco <- read.table("C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3/sylvia_data.txt")
 str(sylvia.eco)
 rownames(sylvia.eco)
 save(sylvia.clus, taxa.sylvia, sylvia.eco,
@@ -223,36 +218,43 @@ write.tree(sylvia.chrono, "sylvia.chrono.tre")
 ```
 
 
+\pagebreak 
 
 ## Question 1.1
 
 Explain all the steps in the script required to obtain the phylogeny and trait data.
 
+1. 
 ```{r}
 library(knitr)
 library(ape)
 x <- paste("AJ5345", 26:49, sep = "")
 x <- c("Z73494", x)
 sylvia.seq <- read.GenBank(x)
-
-
 ```
 
+This first part of the code deals with downloading the genetic sequences for the Sylvia Warbler species through read.GenBank using accession numbers.
 
-
+2.
 ```{r}
 
 
 sylvia.clus <- clustal(sylvia.seq)
 
+win_path <- "C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3"
+wsl_path <- "/mnt/c/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab3"
 
 # manually running mafft
-Sys.setenv(TMPDIR = "C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3")
-write.FASTA(sylvia.seq, file = "C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftin.fas")
+Sys.setenv(TMPDIR = win_path)
+write.FASTA(sylvia.seq, 
+            file = paste0(win_path, "/mafftin.fas"))
 
-system("wsl.exe mafft --localpair --maxiterate 1000 /mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftin.fas > /mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftout.fas 2>/mnt/c/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafft_error.log")
+system(paste0("wsl.exe mafft --localpair --maxiterate 1000 ",
+              wsl_path,"/mafftin.fas > ",
+              wsl_path,"/mafftout.fas 2>",
+              wsl_path,"/mafft_error.log"))
 
-sylvia.maff <- read.dna("C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/mafftout.fas", format = "fasta")
+sylvia.maff <- read.dna(paste0(win_path, "/mafftout.fas"), format = "fasta")
 
 
 # /wsl.localhost/Ubuntu
@@ -263,9 +265,9 @@ identical(sylvia.clus[x, ], sylvia.maff[x, ])
 
 ```
 
+Here we use clustal() and mafft() to align the genetic sequences and ensure the sequences are identically aligned for phylogenetic analysis. The steps are slightly different from the script linked as it did not work properly on windows, but the functionality is the same, just manually doing the modelling through wsl and reading into R.
 
-
-
+3.
 ```{r}
 
 taxa.sylvia <- attr(sylvia.seq, "species")
@@ -274,16 +276,17 @@ rm(sylvia.seq)
 taxa.sylvia[1] <- "Sylvia_atricapilla"
 taxa.sylvia[24] <- "Sylvia_abyssinica"
 
-sylvia.eco <- read.table("C:/Users/johan/Desktop/Plugg/Statistik/Bioinformatik/Bio/lab3/sylvia_data.txt")
+sylvia.eco <- read.table(paste0(win_path, "/sylvia_data.txt"))
 str(sylvia.eco)
 rownames(sylvia.eco)
 save(sylvia.clus, taxa.sylvia, sylvia.eco,
      file = "sylvia.RData")
 ```
 
+Creating taxa of the sequences and naming them properly then removing the sequences to save on memory. Also reading ecological data that contains migration distance, migration behavior and geographical range. Then we save all of our data in a comprehensive RData file.
 
 
-
+4.
 ```{r}
 sylvia.seq.ali<-sylvia.maff
 
@@ -296,9 +299,10 @@ syl.GG95 <- dist.dna(sylvia.seq.ali, model = "GG95", p = TRUE)
 round(cor(cbind(syl.K80, syl.F84, syl.TN93, syl.GG95)), 3)
 ```
 
+Calculating distance for various models (K80, F84, TN93, GG95). The dist.dna() function computes pairwise genetic distances from the aligned sequences, then comparative analysis through correlation matrix.
 
 
-
+5.
 ```{r}
 
 
@@ -319,6 +323,8 @@ add.scale.bar(length = 0.01)
 write.tree(nj.est, "sylvia_nj_k80.tre")
 
 ```
+
+Identify the Chamaea sequence as reference from which we create a neighbor-joining tree using nj() function which is rooted to that sequence. Then we perform a bootstrap analysis to assess the tree reliability. We then create tip labels, plot the tree and write it to file.
 
 
 
@@ -345,7 +351,7 @@ DF <- sylvia.eco[tr$tip.label, ]
 knitr::kable(head(DF))
 ```
 
-
+Reads the written tree again, drops species that are not Curruca or Sylvia, unify those species and make sure spelling is correct, then extract all the aforementioned information regarding species of migration distance & behavior + geographical range.
 
 ## Question 1.2∗
 
