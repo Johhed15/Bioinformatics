@@ -1,0 +1,220 @@
+---
+title: "Lab 4"
+date: "`r Sys.Date()`"
+author: "Johannes Hedström, Mikael Montén"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+  pdf_document:
+    latex_engine: xelatex
+    fig_caption: yes
+    number_sections: yes
+geometry: top=100pt,bottom=100pt,left=68pt,right=66pt
+header-includes:
+- \usepackage{float}
+- \usepackage{longtable}
+- \usepackage{caption}
+- \usepackage{fancyhdr}
+- \usepackage{titling}
+- \renewcommand{\headrulewidth}{0pt}
+- \renewcommand{\and}{\\}
+- \pretitle{\centering\vspace{0cm}{732A51 Bioinformatics \par}\vspace{5cm}\Huge\textbf}
+- \posttitle{\vspace{1cm}\large\textbf{}\par}
+- \preauthor{\centering\vspace{4cm}\normalsize}
+- \postauthor{\par\vspace{2cm}}
+- \predate{\centering{\normalsize STIMA \\
+  Institutionen för datavetenskap \\ Linköpings universitet \par}}
+- \postdate{\par\vspace{0cm}}
+- \raggedbottom
+---
+
+<!-- page number pos -->
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\pagestyle{fancy}
+
+<!-- no page nr on first page  -->
+\pagenumbering{gobble}
+
+<!-- Anger sidbrytning -->
+\clearpage
+
+<!-- creating the table of contents -->
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+<!-- new page -->
+\clearpage
+
+<!-- starting the count on 1 after the contents -->
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, fig.width = 6, fig.height = 4)
+```
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+options(width=100, max.print=1000)
+knitr::opts_chunk$set(
+    eval=as.logical(Sys.getenv("KNITR_EVAL", "TRUE")),
+    cache=as.logical(Sys.getenv("KNITR_CACHE", "TRUE")))
+```
+
+```{r setup, echo=FALSE, messages=FALSE, warnings=FALSE}
+suppressPackageStartupMessages({
+    library(airway)
+    library(DESeq2)
+    library(ggplot2)
+    library(org.Hs.eg.db)
+    library(ALL)
+    library(GEOquery)
+})
+```
+
+
+# Question 1
+
+*Run all the R code and reproduce the graphics. Go carefully through the R code and explain in your words what each step does.*
+*_HINT_ Recall what a design/model matrix is from linear regression.*
+
+```{r}
+## ------------------------------------------------------------------------
+library(GEOquery)
+library(R.utils)
+
+## ---- cache=TRUE---------------------------------------------------------
+#x = getGEOSuppFiles("GSE20986")
+#x
+
+## ------------------------------------------------------------------------
+#untar("GSE20986/GSE20986_RAW.tar", exdir = "data")
+
+## ------------------------------------------------------------------------
+#cels = list.files("data/", pattern = "[gz]")
+#sapply(paste("data", cels, sep = "/"), R.utils::gzip)
+
+## ------------------------------------------------------------------------
+phenodata = matrix(rep(list.files("data"), 2), ncol =2)
+class(phenodata)
+phenodata <- as.data.frame(phenodata)
+colnames(phenodata) <- c("Name", "FileName")
+phenodata$Targets <- c("iris", 
+                       "retina", 
+                       "retina", 
+                       "iris", 
+                       "retina", 
+                       "iris", 
+                       "choroid", 
+                       "choroid", 
+                       "choroid", 
+                       "huvec", 
+                       "huvec", 
+                       "huvec")
+write.table(phenodata, "data/phenodata.txt", quote = F, sep = "\t", row.names = F)
+
+
+## ------------------------------------------------------------------------
+library(affy)
+celfiles <- ReadAffy(covdesc = "phenodata.txt", path = "data")
+boxplot(celfiles)
+library(RColorBrewer)
+cols = brewer.pal(8, "Set1")
+eset <- exprs(celfiles)
+samples <- celfiles$Targets
+colnames(eset)
+colnames(eset) <- samples
+
+boxplot(celfiles, col = cols, las = 2)
+distance <- dist(t(eset), method = "maximum")
+clusters <- hclust(distance)
+plot(clusters)
+
+
+
+## ------------------------------------------------------------------------
+require(simpleaffy)
+require(affyPLM)
+celfiles.gcrma = gcrma(celfiles)
+par(mfrow=c(1,2))
+boxplot(celfiles.gcrma, col = cols, las = 2, main = "Post-Normalization");
+boxplot(celfiles, col = cols, las = 2, main = "Pre-Normalization")
+dev.off()
+
+distance <- dist(t(exprs(celfiles.gcrma)), method = "maximum")
+clusters <- hclust(distance)
+plot(clusters)
+
+## ------------------------------------------------------------------------
+library(limma)
+
+phenodata
+samples <- as.factor(samples)
+design <- model.matrix(~0+samples)
+colnames(design)
+colnames(design) <- c("choroid", "huvec", "iris", "retina")
+design
+contrast.matrix = makeContrasts(
+              huvec_choroid = huvec - choroid, 
+              huvec_retina = huvec - retina, 
+              huvec_iris <- huvec - iris, 
+              levels = design)
+
+fit = lmFit(celfiles.gcrma, design)
+huvec_fit <- contrasts.fit(fit, contrast.matrix)
+huvec_ebay <- eBayes(huvec_fit)
+
+library(hgu133plus2.db)
+library(annotate)
+probenames.list <- rownames(topTable(huvec_ebay, number = 100000))
+getsymbols <- getSYMBOL(probenames.list, "hgu133plus2")
+results <- topTable(huvec_ebay, number = 100000, coef = "huvec_choroid")
+results <- cbind(results, getsymbols)
+
+## ------------------------------------------------------------------------
+summary(results)
+
+results$threshold <- "1"
+a <- subset(results, adj.P.Val < 0.05 & logFC > 5)
+results[rownames(a), "threshold"] <- "2"
+b <- subset(results, adj.P.Val < 0.05 & logFC < -5)
+results[rownames(b), "threshold"] <- "3"
+table(results$threshold)
+
+## ------------------------------------------------------------------------
+library(ggplot2)
+volcano <- ggplot(data = results, 
+                  aes(x = logFC, y = -1*log10(adj.P.Val), 
+                      colour = threshold, 
+                      label = getsymbols))
+
+volcano <- volcano + 
+  geom_point() + 
+  scale_color_manual(values = c("black", "red", "green"), 
+                     labels = c("Not Significant", "Upregulated", "Downregulated"), 
+                     name = "Key/Legend")
+
+volcano + 
+  geom_text(data = subset(results, logFC > 5 & -1*log10(adj.P.Val) > 5), aes(x = logFC, y = -1*log10(adj.P.Val), colour = threshold, label = getsymbols)  )
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
