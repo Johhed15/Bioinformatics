@@ -60,6 +60,8 @@ suppressPackageStartupMessages({
     library(org.Hs.eg.db)
     library(ALL)
     library(GEOquery)
+    library(simpleaffy)
+    library(affyPLM)
 })
 ```
 
@@ -68,35 +70,28 @@ suppressPackageStartupMessages({
 *Run all the R code and reproduce the graphics. Go carefully through the R code and explain in your words what each step does.*
 *_HINT_ Recall what a design/model matrix is from linear regression.*
 
-```{r}
+```{r, cache = TRUE}
 ## ------------------------------------------------------------------------
 library(GEOquery)
 library(R.utils)
-
-## ---- cache=TRUE---------------------------------------------------------
 #x = getGEOSuppFiles("GSE20986")
-#x
-
-## ------------------------------------------------------------------------
 #untar("GSE20986/GSE20986_RAW.tar", exdir = "data")
 
-## ------------------------------------------------------------------------
-#cels = list.files("data/", pattern = "[gz]")
-#sapply(paste("data", cels, sep = "/"), R.utils::gzip)
-
-## ------------------------------------------------------------------------
-#phenodata = matrix(rep(list.files("data"), 1), ncol =1)
-#class(phenodata)
-#phenodata <- as.data.frame(phenodata)
-#colnames(phenodata) <- c("FileName")
-## ------------------------------------------------------------------------
 library(affy)
 path <- "C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab 4/data"
 fns <- list.celfiles(path, full.name = TRUE)
 celfiles <- read.affybatch(celfile.path = fns)
 celfiles$Targets <- c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", "choroid", "choroid", "huvec", "huvec", "huvec")
+
+phenodata <- matrix(c(list.celfiles(path),
+                      list.celfiles(path),
+                      c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", "choroid", "choroid", "huvec", "huvec", "huvec")), ncol = 3)
+colnames(phenodata) <- c("Name", "FileName", "Targets")
+
 boxplot(x = celfiles)
 ```
+
+In this chunk, data is processed and prepared for analysis. The microarray .CEL files are read into an AffyBatch class and the phenodata is created with class labels. Finally, the boxplot showing the intensity values for all samples is plotted.
 
 
 
@@ -105,11 +100,13 @@ library(RColorBrewer)
 cols = brewer.pal(8, "Set1")
 eset <- exprs(celfiles)
 samples <- celfiles$Targets
-colnames(eset)
+#colnames(eset)
 colnames(eset) <- samples
 
 boxplot(celfiles, col = cols, las = 2)
 ```
+Extract the raw expressions (or intensities) from the .CEL-files in the AffyBatch class into a large matrix. Also use the targets in the phenodata object to name samples and set these as column names for the intensities. The boxplot shown is the same as the previous one but uses the defined color palette for a more visually appealing plot.
+
 
 
 ```{r}
@@ -118,17 +115,20 @@ clusters <- hclust(distance)
 plot(clusters)
 ```
 
+Calculate the sample distances and visualize the different intensity columns for the expressions as a hierarchical cluster according to maximum distance. Plot the resulting dendrogram with samples grouped based on similarity, branch lengths indicating differences and using the class labels as tips.
+
+
 
 
 ```{r, cache = TRUE}
 ## ------------------------------------------------------------------------
-require(simpleaffy)
-require(affyPLM)
 celfiles.gcrma = gcrma(celfiles)
 par(mfrow=c(1,2))
 boxplot(celfiles.gcrma, col = cols, las = 2, main = "Post-Normalization");
 boxplot(celfiles, col = cols, las = 2, main = "Pre-Normalization")
 ```
+Applies Robust Multi-Array Average on the AffyBatch to convert it into an expression, which normalizes intensities across the samples. Then plot the boxplots again, showing the already shown one but also the one post-normalization to showcase how the normalization was succesful.
+
 
 
 ```{r}
@@ -138,21 +138,19 @@ distance <- dist(t(exprs(celfiles.gcrma)), method = "maximum")
 clusters <- hclust(distance)
 plot(clusters)
 ```
+Performs a similar hierarchical clustering as before, but this time on the normalized intensities. This still has the .CEL files as tips.
+
 
 ```{r}
 ## ------------------------------------------------------------------------
 library(limma)
-
-phenodata <- matrix(c(list.celfiles(path),
-                      list.celfiles(path),
-                      c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", "choroid", "choroid", "huvec", "huvec", "huvec")), ncol = 3)
-colnames(phenodata) <- c("Name", "FileName", "Targets")
                     
 samples <- as.factor(samples)
 design <- model.matrix(~0+samples)
 colnames(design) <- c("choroid", "huvec", "iris", "retina")
 design
 ```
+This code uses the limma package which is used for the analysis of gene expression microarray data, especially for linear models and analysing designed experiments. The samples i.e. the class labels are converted to factor values so they are treated as groups. Then a design matrix is created with the intercept removed where rows represent the data samples and columns represent the different groups. A 1 in the design matrix indicates the data belonging to that group and vice versa for a 0. The factors are named according to labels and then the design matrix is printed.
 
 
 ```{r}
@@ -177,6 +175,11 @@ results <- cbind(results, getsymbols)
 summary(results)
 ```
 
+contrasts between groups are created between huvec and all other groups according to the design matrix. Then a linear model is fit to the normalized data based on the design matrix. The fit linear model is then used to compute the estimated coefficients and standard errors for the created contrasts, and then empirical Bayes statistics for this differential expression is computed e.g. t-statistics, F-statistics and log-odds of the differential expression. 
+
+The names of the top genes in the differentially expressed probes from the linear model fit is extracted and mapped to gene symbols for easier interpretation. Then the coefficients for the huvec_choroid is extracted and the annotated summary is printed.
+
+
 ```{r}
 results$threshold <- "1"
 a <- subset(results, adj.P.Val < 0.05 & logFC > 5)
@@ -185,6 +188,8 @@ b <- subset(results, adj.P.Val < 0.05 & logFC < -5)
 results[rownames(b), "threshold"] <- "3"
 table(results$threshold)
 ```
+Add a threshold to the results dataframe with the summary statistics for every probe. Every statisically significant gene with a high log fold change (logFC) get threshold 2, every significant with a low log fold change gets threshold 3. All other are thresholded as 1. The print shows the resulting thresholds for every category. The significance aids in identifying relevant changes in the distribution of genes.
+
 
 
 ```{r}
@@ -205,6 +210,8 @@ volcano +
   geom_text(data = subset(results, logFC > 5 & -1*log10(adj.P.Val) > 5), aes(x = logFC, y = -1*log10(adj.P.Val), colour = threshold, label = getsymbols)  )
 
 ```
+
+A ggplot object is initialized with the log fold change on the x-axis. On the y-axis is a negative logged transformation of the adjusted p-value from the results statistics for the probes. The points are colored according to their threshold created earlier, and labeled in the legend according to not being significant, positive logFC (upregulated) or negative logFC (downregulated). Text is added to the genes with high upregulation and high negative log adjusted p-value.
 
 
 
