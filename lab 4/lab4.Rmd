@@ -60,7 +60,6 @@ suppressPackageStartupMessages({
     library(org.Hs.eg.db)
     library(ALL)
     library(GEOquery)
-    library(simpleaffy)
     library(affyPLM)
 })
 ```
@@ -214,19 +213,148 @@ volcano +
 A ggplot object is initialized with the log fold change on the x-axis. On the y-axis is a negative logged transformation of the adjusted p-value from the results statistics for the probes. The points are colored according to their threshold created earlier, and labeled in the legend according to not being significant, positive logFC (upregulated) or negative logFC (downregulated). Text is added to the genes with high upregulation and high negative log adjusted p-value.
 
 
+# Question 2
+
+*In the presented analysis, there are no plots of raw paired data. In the section where the contrasts are defined find the three contrasts. Present the variables versus each other original, log-scaled and MA-plot for each considered pair both before and after normalization. A cluster analysis is performed on the page but not reported. Present plots and also draw heatmaps.*
+
+```{r}
+contrast.matrix
+
+# post-normalization
+fit = lmFit(celfiles.gcrma, design)
+
+# pre-normalization
+unfit = lmFit(celfiles, design)
+```
+## Variables versus each other 
+
+### Choroid vs Huvec
+
+```{r, cache = TRUE}
+# log transform with +1 to avoid nulls
+log_celfiles <- log(exprs(celfiles)+1)
+
+par(mfrow = c(2,1))
+plot(exprs(celfiles)[, samples == "choroid"], exprs(celfiles)[, samples == "huvec"], ylab = "huvec", xlab = "choroid", main = "Original");
+plot(log_celfiles[, samples == "choroid"], log_celfiles[, samples == "huvec"], ylab = "huvec", xlab = "choroid", main = "Log")
+```
 
 
+### Choroid vs Iris
+
+```{r, cache = TRUE}
+# log transform with +1 to avoid nulls
+log_celfiles <- log(exprs(celfiles)+1)
+
+par(mfrow = c(2,1))
+plot(exprs(celfiles)[, samples == "choroid"], exprs(celfiles)[, samples == "iris"], ylab = "iris", xlab = "choroid", main = "Original");
+plot(log_celfiles[, samples == "choroid"], log_celfiles[, samples == "iris"], ylab = "iris", xlab = "choroid", main = "Log")
+```
 
 
+### Choroid vs Retina
+
+```{r, cache = TRUE}
+# log transform with +1 to avoid nulls
+log_celfiles <- log(exprs(celfiles)+1)
+
+par(mfrow = c(2,1))
+plot(exprs(celfiles)[, samples == "choroid"], exprs(celfiles)[, samples == "retina"], ylab = "retina", xlab = "choroid", main = "Original");
+plot(log_celfiles[, samples == "choroid"], log_celfiles[, samples == "retina"], ylab = "retina", xlab = "choroid", main = "Log")
+```
 
 
+### Huvec vs Iris
+
+```{r, cache = TRUE}
+# log transform with +1 to avoid nulls
+log_celfiles <- log(exprs(celfiles)+1)
+
+par(mfrow = c(2,1))
+plot(exprs(celfiles)[, samples == "huvec"], exprs(celfiles)[, samples == "iris"], ylab = "iris", xlab = "huvec", main = "Original");
+plot(log_celfiles[, samples == "huvec"], log_celfiles[, samples == "iris"], ylab = "iris", xlab = "huvec", main = "Log")
+```
 
 
+### Huvec vs Retina
+
+```{r, cache = TRUE}
+# log2 transform with +1 to avoid nulls
+log_celfiles <- log2(exprs(celfiles)+1)
+
+par(mfrow = c(2,1))
+plot(exprs(celfiles)[, samples == "huvec"], exprs(celfiles)[, samples == "retina"], ylab = "retina", xlab = "huvec", main = "Original");
+plot(log_celfiles[, samples == "huvec"], log_celfiles[, samples == "retina"], ylab = "retina", xlab = "huvec", main = "Log")
+```
+
+### Iris vs Retina
+
+```{r, cache = TRUE}
+# log transform with +1 to avoid nulls
+log_celfiles <- log2(exprs(celfiles)+1)
+
+par(mfrow = c(2,1))
+plot(exprs(celfiles)[, samples == "iris"], exprs(celfiles)[, samples == "retina"], ylab = "retina", xlab = "iris", main = "Original");
+plot(log_celfiles[, samples == "iris"], log_celfiles[, samples == "retina"], ylab = "retina", xlab = "iris", main = "Log")
+```
+
+## MA-plots
+
+### Pre-normalization
 
 
+```{r, cache = TRUE}
+par(mfrow = c(2,2))
+limma::plotMA(unfit, coef = "choroid")
+limma::plotMA(unfit, coef = "huvec")
+limma::plotMA(unfit, coef = "iris")
+limma::plotMA(unfit, coef = "retina")
+```
 
 
+## Post-normalization
 
 
+```{r, cache = TRUE}
+par(mfrow = c(2,2))
+limma::plotMA(fit, coef = "choroid")
+limma::plotMA(fit, coef = "huvec")
+limma::plotMA(fit, coef = "iris")
+limma::plotMA(fit, coef = "retina")
+```
+
+## Cluster plots
+
+### Pre-normalization
+
+```{r}
+distance <- dist(t(eset), method = "maximum")
+clusters <- hclust(distance)
+plot(clusters, main = "Cluster dendrogram pre-normalization")
+```
 
 
+### Post-normalization
+
+```{r}
+distance_norm <- dist(t(exprs(celfiles.gcrma)), method = "maximum")
+clusters_norm <- hclust(distance_norm)
+plot(clusters_norm, main = "Cluster dendogram post-normalization", labels = phenodata[,3])
+```
+
+
+## Heat maps
+
+### Pre-normalization
+
+```{r}
+heatmap(as.matrix(distance))
+```
+
+### Post-normalization
+
+```{r}
+heatmap(as.matrix(distance_norm), labRow = phenodata[,3], labCol = phenodata[,3])
+```
+
+# Question 3
