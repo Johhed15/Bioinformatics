@@ -1,12 +1,14 @@
 ---
 title: "Lab 4"
-date: "`r Sys.Date()`"
 author: "Johannes Hedström, Mikael Montén"
+date: "`r Sys.Date()`"
 output:
+  html_document:
+    df_print: paged
   pdf_document:
     latex_engine: xelatex
-    fig_caption: yes
-    number_sections: yes
+    fig_caption: true
+    number_sections: true
 geometry: top=100pt,bottom=100pt,left=68pt,right=66pt
 header-includes:
 - \usepackage{float}
@@ -20,8 +22,8 @@ header-includes:
 - \posttitle{\vspace{1cm}\large\textbf{}\par}
 - \preauthor{\centering\vspace{4cm}\normalsize}
 - \postauthor{\par\vspace{2cm}}
-- \predate{\centering{\normalsize STIMA \\
-  Institutionen för datavetenskap \\ Linköpings universitet \par}}
+- \predate{\centering{\normalsize STIMA \\ Institutionen för datavetenskap \\ Linköpings
+  universitet \par}}
 - \postdate{\par\vspace{0cm}}
 - \raggedbottom
 ---
@@ -48,11 +50,9 @@ header-includes:
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE, fig.width = 6, fig.height = 5)
-```
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
-```{r setup, echo=FALSE, messages=FALSE, warnings=FALSE}
 suppressPackageStartupMessages({
     library(airway)
     library(DESeq2)
@@ -80,14 +80,16 @@ library(affy)
 path <- "C:/Users/wountain/Desktop/SCHOOL/HT24_Bioinformatics/Bioinformatics/lab 4/data"
 fns <- list.celfiles(path, full.name = TRUE)
 celfiles <- read.affybatch(celfile.path = fns)
-celfiles$Targets <- c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", "choroid", "choroid", "huvec", "huvec", "huvec")
+celfiles$Targets <- c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", 
+                      "choroid", "choroid", "huvec", "huvec", "huvec")
 
 phenodata <- matrix(c(list.celfiles(path),
                       list.celfiles(path),
-                      c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", "choroid", "choroid", "huvec", "huvec", "huvec")), ncol = 3)
+                      c("iris", "retina", "retina", "iris", "retina", "iris", "choroid", 
+                        "choroid", "choroid", "huvec", "huvec", "huvec")), ncol = 3)
 colnames(phenodata) <- c("Name", "FileName", "Targets")
 
-boxplot(x = celfiles)
+boxplot(x = celfiles, las = 2)
 ```
 
 In this chunk, data is processed and prepared for analysis. The microarray .CEL files are read into an AffyBatch class and the phenodata is created with class labels. Finally, the boxplot showing the intensity values for all samples is plotted.
@@ -156,7 +158,7 @@ This code uses the limma package which is used for the analysis of gene expressi
 contrast.matrix = makeContrasts(
               huvec_choroid = huvec - choroid, 
               huvec_retina = huvec - retina, 
-              huvec_iris <- huvec - iris, 
+              huvec_iris = huvec - iris, 
               levels = design)
 
 fit = lmFit(celfiles.gcrma, design)
@@ -174,7 +176,7 @@ results <- cbind(results, getsymbols)
 summary(results)
 ```
 
-contrasts between groups are created between huvec and all other groups according to the design matrix. Then a linear model is fit to the normalized data based on the design matrix. The fit linear model is then used to compute the estimated coefficients and standard errors for the created contrasts, and then empirical Bayes statistics for this differential expression is computed e.g. t-statistics, F-statistics and log-odds of the differential expression. 
+Contrasts between groups are created between huvec and all other groups according to the design matrix. Then a linear model is fit to the normalized data based on the design matrix. The fit linear model is then used to compute the estimated coefficients and standard errors for the created contrasts, and then empirical Bayes statistics for this differential expression is computed e.g. t-statistics, F-statistics and log-odds of the differential expression. 
 
 The names of the top genes in the differentially expressed probes from the linear model fit is extracted and mapped to gene symbols for easier interpretation. Then the coefficients for the huvec_choroid is extracted and the annotated summary is printed.
 
@@ -206,17 +208,17 @@ volcano <- volcano +
                      name = "Key/Legend")
 
 volcano + 
-  geom_text(data = subset(results, logFC > 5 & -1*log10(adj.P.Val) > 5), aes(x = logFC, y = -1*log10(adj.P.Val), colour = threshold, label = getsymbols)  )
+  geom_text(data = subset(results, logFC > 5 & -1*log10(adj.P.Val) > 5), 
+            aes(x = logFC, y = -1*log10(adj.P.Val), colour = threshold, label = getsymbols)  )
 
 ```
 
 A ggplot object is initialized with the log fold change on the x-axis. On the y-axis is a negative logged transformation of the adjusted p-value from the results statistics for the probes. The points are colored according to their threshold created earlier, and labeled in the legend according to not being significant, positive logFC (upregulated) or negative logFC (downregulated). Text is added to the genes with high upregulation and high negative log adjusted p-value.
 
-
 # Question 2
 
 *In the presented analysis, there are no plots of raw paired data. In the section where the contrasts are defined find the three contrasts. Present the variables versus each other original, log-scaled and MA-plot for each considered pair both before and after normalization. A cluster analysis is performed on the page but not reported. Present plots and also draw heatmaps.*
-
+  
 ```{r}
 contrast.matrix
 
@@ -226,76 +228,74 @@ fit = lmFit(celfiles.gcrma, design)
 # pre-normalization
 unfit = lmFit(celfiles, design)
 ```
+
 ## Variables versus each other 
+
+```{r}
+# log transform with +1 to avoid nulls
+log_eset <- log(eset+1)
+
+choroid <- eset[, samples == "choroid"]
+huvec <- eset[, samples == "huvec"]
+iris <- eset[, samples == "iris"]
+retina <- eset[, samples == "retina"]
+
+log_choroid <- log_eset[, samples == "choroid"]
+log_huvec <- log_eset[, samples == "huvec"]
+log_iris <- log_eset[, samples == "iris"]
+log_retina <- log_eset[, samples == "retina"]
+```
 
 ### Choroid vs Huvec
 
-```{r, cache = TRUE}
-# log transform with +1 to avoid nulls
-log_celfiles <- log(exprs(celfiles)+1)
-
+```{r, cache = TRUE, fig.height = 7}
 par(mfrow = c(2,1))
-plot(exprs(celfiles)[, samples == "choroid"], exprs(celfiles)[, samples == "huvec"], ylab = "huvec", xlab = "choroid", main = "Original");
-plot(log_celfiles[, samples == "choroid"], log_celfiles[, samples == "huvec"], ylab = "huvec", xlab = "choroid", main = "Log")
+plot(choroid, huvec, ylab = "huvec", xlab = "choroid", main = "Original");
+plot(log_choroid, log_huvec, ylab = "huvec", xlab = "choroid", main = "Log")
 ```
 
 
 ### Choroid vs Iris
 
-```{r, cache = TRUE}
-# log transform with +1 to avoid nulls
-log_celfiles <- log(exprs(celfiles)+1)
-
+```{r, cache = TRUE, fig.height = 7}
 par(mfrow = c(2,1))
-plot(exprs(celfiles)[, samples == "choroid"], exprs(celfiles)[, samples == "iris"], ylab = "iris", xlab = "choroid", main = "Original");
-plot(log_celfiles[, samples == "choroid"], log_celfiles[, samples == "iris"], ylab = "iris", xlab = "choroid", main = "Log")
+plot(choroid, iris, ylab = "iris", xlab = "choroid", main = "Original");
+plot(log_choroid, log_iris, ylab = "iris", xlab = "choroid", main = "Log")
 ```
 
 
 ### Choroid vs Retina
 
-```{r, cache = TRUE}
-# log transform with +1 to avoid nulls
-log_celfiles <- log(exprs(celfiles)+1)
-
+```{r, cache = TRUE, fig.height = 7}
 par(mfrow = c(2,1))
-plot(exprs(celfiles)[, samples == "choroid"], exprs(celfiles)[, samples == "retina"], ylab = "retina", xlab = "choroid", main = "Original");
-plot(log_celfiles[, samples == "choroid"], log_celfiles[, samples == "retina"], ylab = "retina", xlab = "choroid", main = "Log")
+plot(choroid, retina, ylab = "retina", xlab = "choroid", main = "Original");
+plot(log_choroid, log_retina, ylab = "retina", xlab = "choroid", main = "Log")
 ```
 
 
 ### Huvec vs Iris
 
-```{r, cache = TRUE}
-# log transform with +1 to avoid nulls
-log_celfiles <- log(exprs(celfiles)+1)
-
+```{r, cache = TRUE, fig.height = 7}
 par(mfrow = c(2,1))
-plot(exprs(celfiles)[, samples == "huvec"], exprs(celfiles)[, samples == "iris"], ylab = "iris", xlab = "huvec", main = "Original");
-plot(log_celfiles[, samples == "huvec"], log_celfiles[, samples == "iris"], ylab = "iris", xlab = "huvec", main = "Log")
+plot(huvec, iris, ylab = "iris", xlab = "huvec", main = "Original");
+plot(log_huvec, log_iris, ylab = "iris", xlab = "huvec", main = "Log")
 ```
 
 
 ### Huvec vs Retina
 
-```{r, cache = TRUE}
-# log2 transform with +1 to avoid nulls
-log_celfiles <- log2(exprs(celfiles)+1)
-
+```{r, cache = TRUE, fig.height = 7}
 par(mfrow = c(2,1))
-plot(exprs(celfiles)[, samples == "huvec"], exprs(celfiles)[, samples == "retina"], ylab = "retina", xlab = "huvec", main = "Original");
-plot(log_celfiles[, samples == "huvec"], log_celfiles[, samples == "retina"], ylab = "retina", xlab = "huvec", main = "Log")
+plot(huvec, retina, ylab = "retina", xlab = "huvec", main = "Original");
+plot(log_huvec, log_retina, ylab = "retina", xlab = "huvec", main = "Log")
 ```
 
 ### Iris vs Retina
 
-```{r, cache = TRUE}
-# log transform with +1 to avoid nulls
-log_celfiles <- log2(exprs(celfiles)+1)
-
+```{r, cache = TRUE, fig.height = 7}
 par(mfrow = c(2,1))
-plot(exprs(celfiles)[, samples == "iris"], exprs(celfiles)[, samples == "retina"], ylab = "retina", xlab = "iris", main = "Original");
-plot(log_celfiles[, samples == "iris"], log_celfiles[, samples == "retina"], ylab = "retina", xlab = "iris", main = "Log")
+plot(iris, retina, ylab = "retina", xlab = "iris", main = "Original");
+plot(log_iris, log_retina, ylab = "retina", xlab = "iris", main = "Log")
 ```
 
 ## MA-plots
@@ -357,4 +357,76 @@ heatmap(as.matrix(distance))
 heatmap(as.matrix(distance_norm), labRow = phenodata[,3], labCol = phenodata[,3])
 ```
 
+
+
+
 # Question 3
+
+*The volcano plot is only for huvec versus choroid. Provide volcano plots for the other pairs. Indicate significantly differentially expressed genes. Explain how they are found.*
+  
+## Huvec vs Iris
+  
+```{r}
+results_iris <- topTable(huvec_ebay, number = 100000, coef = "huvec_iris")
+results_iris <- cbind(results_iris, getsymbols)
+
+results_iris$threshold <- "1"
+a <- subset(results_iris, adj.P.Val < 0.05 & logFC > 5)
+results_iris[rownames(a), "threshold"] <- "2"
+b <- subset(results_iris, adj.P.Val < 0.05 & logFC < -5)
+results_iris[rownames(b), "threshold"] <- "3"
+#table(results_iris$threshold)
+
+volcano <- ggplot(data = results_iris, 
+                  aes(x = logFC, y = -1*log10(adj.P.Val), 
+                      colour = threshold, 
+                      label = getsymbols))
+
+volcano <- volcano + 
+  geom_point() + 
+  scale_color_manual(values = c("black", "red", "green"), 
+                     labels = c("Not Significant", "Upregulated", "Downregulated"), 
+                     name = "Key/Legend")
+
+volcano + 
+  geom_text(data = subset(results_iris, logFC > 5 & -1*log10(adj.P.Val) > 5), 
+            aes(x = logFC, y = -1*log10(adj.P.Val), colour = threshold, label = getsymbols)  )
+
+
+```
+
+## Huvec vs Retina
+
+```{r}
+results_retina <- topTable(huvec_ebay, number = 100000, coef = "huvec_retina")
+results_retina <- cbind(results_retina, getsymbols)
+
+results_retina$threshold <- "1"
+a <- subset(results_retina, adj.P.Val < 0.05 & logFC > 5)
+results_retina[rownames(a), "threshold"] <- "2"
+b <- subset(results_retina, adj.P.Val < 0.05 & logFC < -5)
+results_retina[rownames(b), "threshold"] <- "3"
+#table(results_iris$threshold)
+
+volcano <- ggplot(data = results_retina, 
+                  aes(x = logFC, y = -1*log10(adj.P.Val), 
+                      colour = threshold, 
+                      label = getsymbols))
+
+volcano <- volcano + 
+  geom_point() + 
+  scale_color_manual(values = c("black", "red", "green"), 
+                     labels = c("Not Significant", "Upregulated", "Downregulated"), 
+                     name = "Key/Legend")
+
+volcano + 
+  geom_text(data = subset(results_retina, logFC > 5 & -1*log10(adj.P.Val) > 5), 
+            aes(x = logFC, y = -1*log10(adj.P.Val), colour = threshold, label = getsymbols)  )
+
+
+```
+
+
+# Question 4
+
+*Try to find more information on the genes that are reported to be significantly differentially expressed. The place to start off is https://www.ncbi.nlm.nih.gov/gene/, remember that the data is from the species human. Try to look also for other databases where (some) information on the genes may be found. Try to follow on some of the provided links. Report in your own words on what you find.*
