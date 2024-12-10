@@ -585,7 +585,7 @@ Some common GO terms:
 
 * Immune Responses: IL1RL1 and SOCS2 are linked to cytokine signaling and inflammation regulation.
 
-```{r}
+```{r, fig.height = 7}
 # Load necessary libraries
 library(igraph)
 
