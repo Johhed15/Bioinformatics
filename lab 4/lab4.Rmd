@@ -106,6 +106,7 @@ colnames(eset) <- samples
 
 boxplot(celfiles, col = cols, las = 2)
 ```
+
 Extract the raw expressions (or intensities) from the .CEL-files in the AffyBatch class into a large matrix. Also use the targets in the phenodata object to name samples and set these as column names for the intensities. The boxplot shown is the same as the previous one but uses the defined color palette for a more visually appealing plot.
 
 
@@ -128,6 +129,7 @@ par(mfrow=c(1,2))
 boxplot(celfiles.gcrma, col = cols, las = 2, main = "Post-Normalization");
 boxplot(celfiles, col = cols, las = 2, main = "Pre-Normalization")
 ```
+
 Applies Robust Multi-Array Average on the AffyBatch to convert it into an expression, which normalizes intensities across the samples. Then plot the boxplots again, showing the already shown one but also the one post-normalization to showcase how the normalization was succesful.
 
 
@@ -139,6 +141,7 @@ distance <- dist(t(exprs(celfiles.gcrma)), method = "maximum")
 clusters <- hclust(distance)
 plot(clusters)
 ```
+
 Performs a similar hierarchical clustering as before, but this time on the normalized intensities. This still has the .CEL files as tips.
 
 
@@ -151,6 +154,7 @@ design <- model.matrix(~0+samples)
 colnames(design) <- c("choroid", "huvec", "iris", "retina")
 design
 ```
+
 This code uses the limma package which is used for the analysis of gene expression microarray data, especially for linear models and analysing designed experiments. The samples i.e. the class labels are converted to factor values so they are treated as groups. Then a design matrix is created with the intercept removed where rows represent the data samples and columns represent the different groups. A 1 in the design matrix indicates the data belonging to that group and vice versa for a 0. The factors are named according to labels and then the design matrix is printed.
 
 
@@ -189,6 +193,7 @@ b <- subset(results, adj.P.Val < 0.05 & logFC < -5)
 results[rownames(b), "threshold"] <- "3"
 table(results$threshold)
 ```
+
 Add a threshold to the results dataframe with the summary statistics for every probe. Every statisically significant gene with a high log fold change (logFC) get threshold 2, every significant with a low log fold change gets threshold 3. All other are thresholded as 1. The print shows the resulting thresholds for every category. The significance aids in identifying relevant changes in the distribution of genes.
 
 
@@ -235,6 +240,7 @@ unfit = lmFit(celfiles, design)
 # log transform with +1 to avoid nulls
 log_eset <- log(eset+1)
 
+# extract out all labels from data for normal and log data
 choroid <- eset[, samples == "choroid"]
 huvec <- eset[, samples == "huvec"]
 iris <- eset[, samples == "iris"]
@@ -254,6 +260,7 @@ plot(choroid, huvec, ylab = "huvec", xlab = "choroid", main = "Original");
 plot(log_choroid, log_huvec, ylab = "huvec", xlab = "choroid", main = "Log")
 ```
 
+Log transforming data reduces absolute distances and show that Choroid and Huvec have largely very similar values, but there is a slight positive correlation amongst the variables.
 
 ### Choroid vs Iris
 
@@ -263,6 +270,7 @@ plot(choroid, iris, ylab = "iris", xlab = "choroid", main = "Original");
 plot(log_choroid, log_iris, ylab = "iris", xlab = "choroid", main = "Log")
 ```
 
+Iris has many 0 value expressions. Those that are non-zero seem to share a positive correlation with Choroid.
 
 ### Choroid vs Retina
 
@@ -272,6 +280,7 @@ plot(choroid, retina, ylab = "retina", xlab = "choroid", main = "Original");
 plot(log_choroid, log_retina, ylab = "retina", xlab = "choroid", main = "Log")
 ```
 
+Choroid and retina share a positive correlation amongst each other.
 
 ### Huvec vs Iris
 
@@ -281,6 +290,7 @@ plot(huvec, iris, ylab = "iris", xlab = "huvec", main = "Original");
 plot(log_huvec, log_iris, ylab = "iris", xlab = "huvec", main = "Log")
 ```
 
+Again, the many zero values of Iris are shown. Otherwise the variables are distributed similarly but with a slight positive correlation.
 
 ### Huvec vs Retina
 
@@ -290,6 +300,8 @@ plot(huvec, retina, ylab = "retina", xlab = "huvec", main = "Original");
 plot(log_huvec, log_retina, ylab = "retina", xlab = "huvec", main = "Log")
 ```
 
+Variables are distributed largely the same, a few outliers that are very separated from the rest of the group. However, the other variables are distributed similarly with a positive correlation.
+
 ### Iris vs Retina
 
 ```{r, cache = TRUE, fig.height = 7}
@@ -298,18 +310,22 @@ plot(iris, retina, ylab = "retina", xlab = "iris", main = "Original");
 plot(log_iris, log_retina, ylab = "retina", xlab = "iris", main = "Log")
 ```
 
+The variables seem to share a positive correlation except for the 0 values.
+
 ## MA-plots
 
 ### Pre-normalization
 
-
 ```{r, cache = TRUE}
 par(mfrow = c(2,2))
-limma::plotMA(unfit, coef = "choroid")
-limma::plotMA(unfit, coef = "huvec")
-limma::plotMA(unfit, coef = "iris")
-limma::plotMA(unfit, coef = "retina")
+limma::plotMA(unfit, coef = "choroid", main = "Choroid")
+limma::plotMA(unfit, coef = "huvec", main = "Huvec")
+limma::plotMA(unfit, coef = "iris", main = "Iris")
+limma::plotMA(unfit, coef = "retina", main = "Retina")
 ```
+
+The MA-plots for every variable show a strong positive correlation. This indicates that the expression levels in the genes are consistent across the samples. This means there are few significant differential expression changes and the overall gene expressions are similar.
+
 
 
 ## Post-normalization
@@ -317,11 +333,13 @@ limma::plotMA(unfit, coef = "retina")
 
 ```{r, cache = TRUE}
 par(mfrow = c(2,2))
-limma::plotMA(fit, coef = "choroid")
-limma::plotMA(fit, coef = "huvec")
-limma::plotMA(fit, coef = "iris")
-limma::plotMA(fit, coef = "retina")
+limma::plotMA(fit, coef = "choroid", main = "Choroid")
+limma::plotMA(fit, coef = "huvec", main = "Huvec")
+limma::plotMA(fit, coef = "iris", main = "Iris")
+limma::plotMA(fit, coef = "retina", main = "Retina")
 ```
+
+Normalization has increased the correlation of the distributions, meaning the gene expression are even more similar. This makes sense after normalization as it should all be on the same scale and thus more comparable.
 
 ## Cluster plots
 
@@ -333,6 +351,11 @@ clusters <- hclust(distance)
 plot(clusters, main = "Cluster dendrogram pre-normalization")
 ```
 
+```{r}
+heatmap(as.matrix(distance))
+```
+
+Huvec and Retina seem to be close to each other, while Iris and Choroid are more similar. Meanwhile, the left most group of huvec and retina are far away from the other groups. The heatmap show this as well, with the dark intense color for those groups far away.
 
 ### Post-normalization
 
@@ -342,20 +365,13 @@ clusters_norm <- hclust(distance_norm)
 plot(clusters_norm, main = "Cluster dendogram post-normalization", labels = phenodata[,3])
 ```
 
-
-## Heat maps
-
-### Pre-normalization
-
-```{r}
-heatmap(as.matrix(distance))
-```
-
-### Post-normalization
-
 ```{r}
 heatmap(as.matrix(distance_norm), labRow = phenodata[,3], labCol = phenodata[,3])
 ```
+
+
+Normalization has changed the clusters around. Huvec are now close to each other and no other gene. Retina, Iris, and choroid are instead more similar and close to each other in the dendrogram. The heatmap shows that the normalization has closed the distance between the same gene groups, but that the distance from the other genes are now more far away than they (comparatively) were pre-normalization, which represents the relationships better. Also the clear distinction of Huvec from the other ones.
+
 
 
 
@@ -426,7 +442,198 @@ volcano +
 
 ```
 
+The significantly differentially expressed genes are found by first proccessing microarray experiments with GCRMA and setting up a design matrix where each row represent a sample and columns a group. After that a linear model is fitted on the normalized data and contrasts between groups like 'huvec - retina' are defined to allow for comparison of gene expression levels between specific groups. 
+
+Then the statistical testing starts with contrast.fit, where the contrast is applied on the linear model to focus on the wanted groups. Empirical bayes adjustment is used to account for the variability in the data, improving reliability of the estimates. The function 'topTable' is then used to extract the wanted results for the contrasts including 'logFC' to indicate the magnitude of the differential expression and 'adj.P.Val' to adjust the p-value for  multiple testing. We then apply thresholds for significance, where adjusted P-values less then 0.05 and logFC larger than 5 is Upregulated genes and adjusted P-values less than 0.05 but with logFC less than -5 are Downregulated genes. -1$\cdot$log10(adj.P.Val) is used to make really small adjusted P-values to stand out in the plots. The significant genes of interest (logFC > 5 & -1$\cdot$log10(adj.P.Val)) > 5) have their names printed in the plots, and not all significant genes as they are visualized with color. 
 
 # Question 4
 
 *Try to find more information on the genes that are reported to be significantly differentially expressed. The place to start off is https://www.ncbi.nlm.nih.gov/gene/, remember that the data is from the species human. Try to look also for other databases where (some) information on the genes may be found. Try to follow on some of the provided links. Report in your own words on what you find.*
+
+*Report all the Gene Ontology (GO) terms associated with each gene. Are any of the GO terms common between genes? If so do the common GO terms seem to be related to anything particular? Try to present GO analysis in an informative manner, if possible visualize.*
+
+```{r}
+# getting significant and with names printed for all pairs
+index1 <- which(results$logFC > 5 & -1*log10(results$adj.P.Val) > 5)
+index2 <- which(results_iris$logFC > 5 & -1*log10(results_iris$adj.P.Val) > 5)
+index3 <- which(results_retina$logFC > 5 & -1*log10(results_retina$adj.P.Val) > 5)
+
+# one index without couplicates
+index <- unique(c(index1,index2,index3))
+unique(results$getsymbols[index])
+```
+
+
+*Other databases:*
+
+https://www.genecards.org/
+
+This database seems to use data from RefSeq, jul 2008.
+
+One of the significant genes are without any name in getsymbols <- getSYMBOL(probenames.list, "hgu133plus2").
+
+
+## HOXB7 - homeobox B7
+
+A member of the homeobox family, located on chromosome 17. Increased expressions of the gene is associated with some cases pf melanoma and ovarian carcinoma. Broad expressions in kidney, colon, fat etc.
+
+Diseases associated with it include Barrett Esophagus(can become cancerous) and Bilateral Renal Aplasia(kidney development). 
+
+
+![Gene Ontology functions ](HOXB7.png)
+
+## GPR37 - G Protein-Coupled Receptor 37
+
+G protein-coupled receptor faimly, contaisn seven transmembrane domains, involved in translating outside signals into G protein mediated intracellular effects. Biased expressions in brain and testis, interacts with Parkin and is involved in juvenile Parkinson disease. Also associated with Autism Spectrum Disorder.
+
+![Gene Ontology functions ](GPR37.png)
+
+## ALDH1A2 -  Aldehyde Dehydrogenase 1 Family Member A2
+
+The protein belongs to the aldehyde dehydrogenase family, the product of the gene is an enzyme which catalyzes the synthesis of the active derivative of vitamine A(retinol), which is a hormonal signal molecule to develop adult tissues. Biased expression in endometrium and testis. 
+Assiciated with diseases included Diaphragmatic Hernia 4, with Cardiovascular Defects(birth defect, affects breathing) and Renal Hypodysplasia/aplasia 1(anomalies of kidney and urinary tract).
+
+
+![Gene Ontology functions ](ALDH1A2.png)
+
+## IL1RL1
+
+A member of the interluekin 1 receptor family, similar to gene in mouse that studies suggest induce proinflammatory stimuli(immune system).
+Biased expression in placenta. Associated with Chicken egg allergy and Conjunctivitis(pink eye).
+
+
+![Gene Ontology functions ](IL1RL1.png)
+
+
+## HOXA5 - homeobox A5
+
+Encodes the class of homeobox genes that are found in 4 clusters, A, B C and D on four seperate chromosomes. The expressions of these proteins is spatially and temporally regulated during embryonic development. Biased expression in adrenal and lungs.
+Diseases associated with HOXA5 include Embryonal Carcinoma(fast-growing testicle-tumor) and Mediastinal Gray Zone Lymphoma(cancer in the a part of the chest).
+
+
+
+![Gene Ontology functions ](HOXA5.png)
+
+## HOXB6 homeobox B6
+
+Member of the Antp homeobox family, included in a cluster of homeobox B genes in chromosome 17. Involved in development of lung and skin, biased expression in kidney and colon. Seems similar to Homeobox B7 with many of it traits. 
+Diseases associated with HOXB6 include Hypospadias(opening of the urethra is not at the tip of the penis) and Myeloid Leukemia(type of bone marrow cancer).
+
+![Gene Ontology functions ](HOXB6.png)
+
+
+## GABBR2 - gamma-aminobutyric acid type B receptor subunit 2 
+
+Belongs to the G-protein coupled receptor 3 family and GABA-B receptor subfamily. Allelic variants of this gene have been associated with nikotine dependence. Restricted expression toward brain. 
+Diseases associated with GABBR2 include Neurodevelopmental Disorder With Poor Language And Loss Of Hand Skills.
+
+
+![Gene Ontology functions ](GABBR2.png)
+
+## SOCS2 -suppressor of cytokine signaling 2
+
+This gene encodes a member of the suppressor of cytokine signaling (SOCS) family.
+Broad expression in endometrium, prostate and adrenal etc. 
+Diseases associated with SOCS2 include Hematologic(blood) Cancer and Polycythemia Vera(blood disorder, too many red blood cells).
+
+![Gene Ontology functions ](SOCS2.png)
+
+
+
+## CCNK - cyclin  k
+
+The protein encoded by this gene is a member of the transcription cyclin family.
+Ubiquitous expression in bone marrow and testis etc.
+Diseases associated with CCNK include Intellectual Developmental Disorder With Hypertelorism And Distinctive Facies(severe intellectual disability) and Kaposi Sarcoma(cancer in cells that line lymph and blood vessels).
+
+
+![Gene Ontology functions ](CCNK.png)
+
+
+## CYP27C1 - cytochrome P450 family 27 subfamily C member 1
+
+This gene encodes a member of the cytochrome P450 superfamily of enzymes. Biased expression in skin and urinary bladder.
+Diseases associated with CYP27C1 include Keratomalacia(eye disorder, often caused by low intake of the protein) and X-Linked Sideroblastic Anemia With Ataxia(smaller and paler red blood cells, less oxygen carried on the blood).
+
+![Gene Ontology functions ](CYP27C1.png)
+
+## GBGT1 - globoside alpha-1,3-N-acetylgalactosaminyltransferase 1
+
+This gene encodes a glycosyltransferase that plays a role in the synthesis of Forssman glycolipid (FG), a member of the globoseries glycolipid family. Ubiquitous expression in placenta and appendix etc.
+Diseases associated with GBGT1 include Niemann-Pick Disease, Type C1(loses function to move and use cholestrol nd ther lipids in cels) and Hyperinsulinemic Hypoglycemia, Familial, 7(insulin, low blood sugar).
+
+![Gene Ontology functions ](GBGT1.png)
+
+## RASGRF2 - Ras protein specific guanine nucleotide releasing factor 2
+
+RAS GTPases cycle between an inactive GDP-bound state and an active GTP-bound state. Broad expression in brain and ovary etc. 
+Diseases associated with RASGRF2 include Autism Spectrum Disorder(same as GPR37).
+
+
+![Gene Ontology functions ](RASGRF2.png)
+
+
+## Summary of similarities
+
+Some common GO terms:
+
+* Developmental Processes: Homeobox genes like HOXB7, HOXA5, and HOXB6 share roles in embryonic development and tissue differentiation.
+
+* Signal Transduction: Genes such as GPR37, GABBR2, and RASGRF2 are integral to G-protein coupled receptor signaling or similar pathways.
+
+* Metabolic and Biosynthetic Functions: Enzymes like ALDH1A2 and CYP27C1 are critical for vitamin A metabolism and other biochemical pathways.
+
+* Immune Responses: IL1RL1 and SOCS2 are linked to cytokine signaling and inflammation regulation.
+
+```{r}
+# Load necessary libraries
+library(igraph)
+
+# Define the list of GO terms and corresponding genes
+go_terms <- list(
+  "Developmental Process" = c("HOXB7", "HOXA5", "HOXB6", "ALDH1A2"),
+  "Signal Transduction" = c("GPR37", "GABBR2", "RASGRF2", "CCNK"),
+  "Immune Response" = c("IL1RL1", "SOCS2"),
+  "Metabolic Process" = c("ALDH1A2", "CYP27C1"),
+  "Neurological Function" = c("GABBR2", "GPR37", "RASGRF2"),
+  "Cancer Pathway" = c("HOXB7", "HOXB6", "SOCS2"),
+  "G Protein-Coupled Receptor Activity" = c("GPR37", "GABBR2"),
+  "Embryonic Development" = c("HOXA5", "HOXB7", "HOXB6"),
+  "Vitamin A Metabolism" = c("ALDH1A2"),
+  "Hormone Signaling" = c("SOCS2", "IL1RL1"),
+  "Protein Binding" = c("CCNK", "SOCS2", "RASGRF2"),
+  "Oxidative Stress Response" = c("CYP27C1", "ALDH1A2"),
+  "Immune Regulation" = c("IL1RL1", "SOCS2"),
+  "Lipid and Steroid Metabolism" = c("CYP27C1", "SOCS2")
+)
+
+# Convert the list to a data frame for easy viewing and manipulation
+go_terms_df <- do.call(rbind, lapply(names(go_terms), function(term) {
+  data.frame(
+    GO_Term = term,
+    Gene = go_terms[[term]]
+  )
+}))
+
+# Print the data frame
+
+# Create the graph
+graph <- graph_from_data_frame(go_terms_df, directed = FALSE)
+
+# Set node types (GO Terms vs Genes)
+V(graph)$type <- ifelse(V(graph)$name %in% names(go_terms), "GO Term", "Gene")
+
+# Set colors for nodes
+V(graph)$color <- ifelse(V(graph)$type == "GO Term", "lightgreen", "skyblue")
+
+# Plot the graph
+plot(
+  graph, 
+  vertex.color = V(graph)$color,
+  vertex.label.cex = 0.8,
+  vertex.size = 25,
+  edge.color = "gray",
+  main = "Network of Genes and Shared GO Terms"
+)
+
+```
