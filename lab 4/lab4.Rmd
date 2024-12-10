@@ -579,9 +579,9 @@ Some common GO terms:
 
 * Developmental Processes: Homeobox genes like HOXB7, HOXA5, and HOXB6 share roles in embryonic development and tissue differentiation.
 
-* Signal Transduction: Genes such as GPR37, GABBR2, and RASGRF2 are integral to G-protein coupled receptor signaling or similar pathways.
+* Signal Transduction: Genes such as GPR37, GABBR2 are integral to G-protein coupled receptor signaling.
 
-* Metabolic and Biosynthetic Functions: Enzymes like ALDH1A2 and CYP27C1 are critical for vitamin A metabolism and other biochemical pathways.
+* Metabolic and Biosynthetic Functions: ALDH1A2 and CYP27C1 are critical for vitamin A metabolism and other biochemical pathways.
 
 * Immune Responses: IL1RL1 and SOCS2 are linked to cytokine signaling and inflammation regulation.
 
@@ -591,7 +591,7 @@ library(igraph)
 
 # List with some Go terms (not all)
 go_terms <- list(
-  "DNA-binding transcription" = c("HOXB7","HOXA5"),
+  "DNA-binding transcription activator" = c("HOXB7","HOXA5"),
   "DNA-binding transcription factor activity" = c("HOXB7","HOXA5","HOXB6"),
   "Protein Binding" = c("HOXB7","GPR37","IL1RL1","HOXA5","HOXB6","GABBR2","SOCS2","CCNK"),
   "G protein-coupled peptide receptor" = c('GPR37','GABBR2'),
