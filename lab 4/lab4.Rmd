@@ -589,25 +589,19 @@ Some common GO terms:
 # Load necessary libraries
 library(igraph)
 
-# Define the list of GO terms and corresponding genes
+# List with some Go terms (not all)
 go_terms <- list(
-  "Developmental Process" = c("HOXB7", "HOXA5", "HOXB6", "ALDH1A2"),
-  "Signal Transduction" = c("GPR37", "GABBR2", "RASGRF2", "CCNK"),
-  "Immune Response" = c("IL1RL1", "SOCS2"),
-  "Metabolic Process" = c("ALDH1A2", "CYP27C1"),
-  "Neurological Function" = c("GABBR2", "GPR37", "RASGRF2"),
-  "Cancer Pathway" = c("HOXB7", "HOXB6", "SOCS2"),
-  "G Protein-Coupled Receptor Activity" = c("GPR37", "GABBR2"),
-  "Embryonic Development" = c("HOXA5", "HOXB7", "HOXB6"),
-  "Vitamin A Metabolism" = c("ALDH1A2"),
-  "Hormone Signaling" = c("SOCS2", "IL1RL1"),
-  "Protein Binding" = c("CCNK", "SOCS2", "RASGRF2"),
-  "Oxidative Stress Response" = c("CYP27C1", "ALDH1A2"),
-  "Immune Regulation" = c("IL1RL1", "SOCS2"),
-  "Lipid and Steroid Metabolism" = c("CYP27C1", "SOCS2")
+  "DNA-binding transcription" = c("HOXB7","HOXA5"),
+  "DNA-binding transcription factor activity" = c("HOXB7","HOXA5","HOXB6"),
+  "Protein Binding" = c("HOXB7","GPR37","IL1RL1","HOXA5","HOXB6","GABBR2","SOCS2","CCNK"),
+  "G protein-coupled peptide receptor" = c('GPR37','GABBR2'),
+  "Nueropeptide binding" = c("GPR37"),
+  "Retinal binding" = c("ALDH1A2","CYP27C1"),
+  "Cytokine receptor activity/binding" = c("IL1RL1","SOCS2"),
+  "Metal ion binding"=c('GBGT1')
 )
 
-# Convert the list to a data frame for easy viewing and manipulation
+# Convert the list to a data frame
 go_terms_df <- do.call(rbind, lapply(names(go_terms), function(term) {
   data.frame(
     GO_Term = term,
@@ -615,25 +609,22 @@ go_terms_df <- do.call(rbind, lapply(names(go_terms), function(term) {
   )
 }))
 
-# Print the data frame
-
 # Create the graph
 graph <- graph_from_data_frame(go_terms_df, directed = FALSE)
 
-# Set node types (GO Terms vs Genes)
+# Set node types (GO Terms vs Genes) on the Vertices 
 V(graph)$type <- ifelse(V(graph)$name %in% names(go_terms), "GO Term", "Gene")
 
 # Set colors for nodes
-V(graph)$color <- ifelse(V(graph)$type == "GO Term", "lightgreen", "skyblue")
+V(graph)$color <- ifelse(V(graph)$type == "GO Term", "purple", "green")
 
-# Plot the graph
 plot(
   graph, 
   vertex.color = V(graph)$color,
   vertex.label.cex = 0.8,
   vertex.size = 25,
   edge.color = "gray",
-  main = "Network of Genes and Shared GO Terms"
+  main = "Network of Genes and some of their shared GO Terms"
 )
 
 ```
