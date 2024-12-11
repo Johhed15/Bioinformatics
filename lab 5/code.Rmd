@@ -109,37 +109,31 @@ knitr::kable(summary_stats, caption = "Summary statistics for chosen dataset")
 There are differences in the fraction of nodes in largest SCC, the longest shortest path and the 90-percentile effective diameter between the BioSNAP summary and the summary produced here. The differences are small, and the concrete statistics such as nodes and edges are the same, meaning the constructed graph is very similar but calculated differently. Most likely, the differences comes from choices of computation, such as the diameter being calculated with different algorithms which might handle edge cases in different ways. Also, the graph created here has been created as undirected, but perhaps extra information exists that could make it directed. The fraction of nodes in the largest SCC differ, while the fraction of edges in the largest SCC are identical, which means there is some difference in how the fraction is calculated in the BioSNAP database.
 
 
-Plotting the full graph will not yield a meaningful visualization as there are too many nodes and edges, therefore we sample the most contributing SCC to show the most important genes.
-
 ```{r, fig.height = 7, fig.width = 7}
-# find amount of edges per node
-node_degrees <- degree(scc)
-
-# sort descendingly and find names of the best, cutoff point is at 14 edges
-best_nodes <- names(node_degrees[node_degrees > 14])
-
-# create the subsampled graph
-sampled_graph <- induced_subgraph(scc,best_nodes)
-
 # set node types
-V(sampled_graph)$type <- ifelse(V(sampled_graph)$name %in% data[,1], "Drug", "Gene")
+V(graph)$type <- ifelse(V(graph)$name %in% data[,1], "Drug", "Gene")
 
 # set colors for nodes
-V(sampled_graph)$color <- ifelse(V(sampled_graph)$type == "Drug", "purple", "orange")
+V(graph)$color <- ifelse(V(graph)$type == "Drug", "purple", "orange")
 
 plot(
-  sampled_graph, 
-  vertex.color = V(sampled_graph)$color,
-  vertex.size = 3,
+  graph, 
+  vertex.color = V(graph)$color,
+  vertex.size = 2,
   vertex.label=NA, 
   edge.color = "gray",
+  edge.size = 0.01,
   main = "Network of drugs and genes"
 )
-
 ```
 
-The plotted graph above shows Drug nodes as purple and Gene nodes as orange. The cutoff for amount of edges per node required to be plotted was at 14 edges, which is the highest amount igraph could handle. This graph shows that there is a large cluster of drugs and genes that are closely connected, and a large half-circle of both type of nodes that are further away which doesn't have any visualized edges as the connected nodes are not plotted. 
+The plotted graph above shows Drug nodes as purple and Gene nodes as orange. There is a large cluster in the center with a lot of close connectivity between groups, yet distances between nodes differ largely and it would probably be apt to create more clusters. Then there is a large ring outer circle of nodes that has no apparent edges connecting them. There are only Genes in the outer circle at least in this format, but there are also overlapping nodes. As there are a lot of nodes and edges there is hard to say anything regarding how nodes are connected and potential directions in the graph, which requires a more formal analysis.
+
 
 \pagebreak
 
 2. *The next step is to try to identify some clusters (communities in the graph). You can follow the tutorial at https:// psych-networks.com/r-tutorial-identify-communities-items-networks/ to achieve this. Once you have found some clusters, identify the elements in it and try to find information on this cluster. Is it related to some known biological phenomena? If you do not find anything, then document your search attempts. If it will not be possible to do this question on the whole downloaded graph, then you may take some sub-graph of it.*
+
+
+
+
