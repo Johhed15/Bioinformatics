@@ -108,8 +108,8 @@ knitr::kable(summary_stats, caption = "Summary statistics for chosen dataset")
 
 There are differences in the fraction of nodes in largest SCC, the longest shortest path and the 90-percentile effective diameter between the BioSNAP summary and the summary produced here. The differences are small, and the concrete statistics such as nodes and edges are the same, meaning the constructed graph is very similar but calculated differently. Most likely, the differences comes from choices of computation, such as the diameter being calculated with different algorithms which might handle edge cases in different ways. Also, the graph created here has been created as undirected, but perhaps extra information exists that could make it directed. The fraction of nodes in the largest SCC differ, while the fraction of edges in the largest SCC are identical, which means there is some difference in how the fraction is calculated in the BioSNAP database.
 
-
 ```{r, fig.height = 7, fig.width = 7}
+set.seed(123456)
 # set node types
 V(graph)$type <- ifelse(V(graph)$name %in% data[,1], "Drug", "Gene")
 
@@ -128,6 +128,34 @@ plot(
 ```
 
 The plotted graph above shows Drug nodes as purple and Gene nodes as orange. There is a large cluster in the center with a lot of close connectivity between groups, yet distances between nodes differ largely and it would probably be apt to create more clusters. Then there is a large ring outer circle of nodes that has no apparent edges connecting them. There are only Genes in the outer circle at least in this format, but there are also overlapping nodes. As there are a lot of nodes and edges there is hard to say anything regarding how nodes are connected and potential directions in the graph, which requires a more formal analysis.
+
+For slightly more detail, here only the largest connected component is computed.
+
+```{r, fig.height = 7, fig.width = 7}
+set.seed(123456)
+clusters <- components(graph) # find components
+
+# largest component
+largest_component <- induced_subgraph(graph, which(clusters$membership == which.max(clusters$csize)))
+
+# set node types
+V(largest_component)$type <- ifelse(V(largest_component)$name %in% data[,1], "Drug", "Gene")
+
+# set colors for nodes
+V(largest_component)$color <- ifelse(V(largest_component)$type == "Drug", "purple", "orange")
+
+plot(
+  largest_component, 
+  vertex.color = V(largest_component)$color,
+  vertex.size = 3,
+  vertex.label=NA, 
+  edge.color = "gray",
+  edge.size = 0.01,
+  main = "Network of largest connected drugs and genes"
+)
+```
+
+There is still hard to decipher the network but shows a bit more structure, also a bit smaller for use of ease.
 
 
 \pagebreak
