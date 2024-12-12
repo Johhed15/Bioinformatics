@@ -134,7 +134,90 @@ The plotted graph above shows Drug nodes as purple and Gene nodes as orange. The
 
 2. *The next step is to try to identify some clusters (communities in the graph). You can follow the tutorial at https://psych-networks.com/r-tutorial-identify-communities-items-networks/ to achieve this. Once you have found some clusters, identify the elements in it and try to find information on this cluster. Is it related to some known biological phenomena? If you do not find anything, then document your search attempts. If it will not be possible to do this question on the whole downloaded graph, then you may take some sub-graph of it.*
 
+To perform the cluster analysis the first step is to perform the Spinglass Algorithm from the linked webpage.
 
+As the original graph isn't connected, which is a requirement for the algorithm, the largest component network will be used.
+```{r}
+is_connected(graph)
+is_connected(largest_component)
+```
+
+The guide mentions that the spinglass algorithm can differ between runs, but often provide very similar results to the walktrap algorithm which is fairly deterministic. Due to the size of the network, only a single run of the spinglass algorithm will be run for the sake of compute time.
+
+```{r, fig.height = 7, fig.width = 7}
+set.seed(123456)
+g <- largest_component
+sgc <- cluster_spinglass(g)
+
+# assign cluster memberships to vertices
+V(g)$cluster <- sgc$membership
+
+# assign colors to vertices depending on membership
+colors <- rainbow(length(unique(sgc$membership)))
+V(g)$color <- colors[V(g)$cluster]
+
+plot(
+  g, 
+  vertex.color = V(g)$color,
+  vertex.size = 3,
+  vertex.label=NA, 
+  edge.color = "gray",
+  edge.size = 0.01,
+  main = "Network of clustered drugs and genes"
+)
+```
+
+As there are 25 different clusters which also are not very separated in the graph as they are highly connected to each other, some further subsampling will be performed.
+
+```{r}
+cluster_sizes <- table(sgc$membership)
+cluster_sizes
+```
+Let's take a look at the biggest cluster
+
+```{r, fig.height = 7, fig.width = 7}
+cluster25 <- V(g)[sgc$membership == 25]
+cluster25_graph <- induced_subgraph(g, cluster25)
+
+# set node types
+V(cluster25_graph)$type <- ifelse(V(cluster25_graph)$name %in% data[,1], "Drug", "Gene")
+
+# set colors for nodes
+V(cluster25_graph)$color <- ifelse(V(cluster25_graph)$type == "Drug", "purple", "orange")
+
+
+plot(
+  cluster25_graph, 
+  #vertex.label = V(cluster25_graph)$name,
+  vertex.size = 3,
+  vertex.label=NA, 
+  edge.color = "gray",
+  edge.size = 0.01,
+  main = "Network of biggest cluster of drugs and genes"
+)
+```
+
+Cluster 25 is plotted above. Again, Drug nodes are colored purple and Gene nodes are colored orange. There is a big amount of drug nodes in this cluster compared to genes. Below follows the associated labels with the cluster.
+
+```{r}
+cluster25_vec <- V(cluster25_graph)$name
+cluster25_vec
+```
+
+To analyze this, all proteins will be ran in the STRING database (https://string-db.org/).
+
+First, extract all proteins into a list. This file is uploaded on the "multiple proteins" section on STRING (https://string-db.org/cgi/input?sessionId=bWLThyUmK3Hr&input_page_active_form=multiple_identifiers)
+
+```{r}
+genes <- cluster25_vec[!grepl("^D", cluster25_vec)]
+
+#writeLines(genes, "cluster25_genes.txt")
+```
+
+The proteins are linked as follows,
+
+![](string_normal_image.png)
+Out of the 75 gene proteins, 35 are mentioned in a paper "Functional characterization of G-protein-coupled receptors: a bioinformatics approach" by Tovo-Rodrigues L, Roux A, Hutz MH, Rohde LA, Woods AS where they discuss how G protein-coupled receptors (GPCRs) involved in synaptic transmission have flexible regions that allow them to interact with other proteins and adapt to different functions. These regions are especially common in certain parts of the receptors and contain patterns important for protein regulation and forming connections. This flexibility and adaptability may play a key role in how the nervous system functions and adjusts to changes.
 
 
 # Question 2
