@@ -132,8 +132,196 @@ The plotted graph above shows Drug nodes as purple and Gene nodes as orange. The
 
 \pagebreak
 
-2. *The next step is to try to identify some clusters (communities in the graph). You can follow the tutorial at https:// psych-networks.com/r-tutorial-identify-communities-items-networks/ to achieve this. Once you have found some clusters, identify the elements in it and try to find information on this cluster. Is it related to some known biological phenomena? If you do not find anything, then document your search attempts. If it will not be possible to do this question on the whole downloaded graph, then you may take some sub-graph of it.*
+2. *The next step is to try to identify some clusters (communities in the graph). You can follow the tutorial at https://psych-networks.com/r-tutorial-identify-communities-items-networks/ to achieve this. Once you have found some clusters, identify the elements in it and try to find information on this cluster. Is it related to some known biological phenomena? If you do not find anything, then document your search attempts. If it will not be possible to do this question on the whole downloaded graph, then you may take some sub-graph of it.*
 
+
+
+
+# Question 2
+
+*Recreate one of the three analyses that can be found on https://strimmerlab.github.io/ software/genenet/index.html. Document and discuss all your steps. In the analyses there is the step where you select the edges to keep. There a particular criterion is chosen for edge inclusion. Vary this criterion and explore how the resulting clusters will differ with the changes. Take one found cluster, identify the elements in it and try to find information on this cluster. Is it related to some known biological phenomena? If you do not find anything, then document your search attempts.*
+
+## E. coli data (Schäfer and Strimmer 2005)
+
+```{r}
+# Load GeneNet package
+
+library("GeneNet")
+
+data(ecoli)
+dim(ecoli)
+```
+
+Loading tha dataset and its longitude data, with 120 variables measured at 9 different timepoints.
+
+
+
+```{r}
+#'
+#' # Estimation of partial correlations
+
+#' Estimate matrix of partial correlation using a shrinkage estimator:
+pc = ggm.estimate.pcor(ecoli)
+dim(pc)
+```
+
+This step estimates the partial correlation for all pairs of genes in the dataset. The output will be a square matrix of partial correlations.
+
+
+```{r}
+#' Assign p-values, q-values and empirical posterior probabilities to all
+#' 5151 potential edges in the network:
+ecoli.edges = network.test.edges(pc, direct=TRUE, fdr=TRUE)
+dim(ecoli.edges)
+```
+
+We use the network.test.edges function to assign p-values, q-values, and posterior probabilities to the potential edges in the network and save in a table
+
+```{r}
+#' The table lists all edges in the order strength of partial correlations:
+ecoli.edges[1:5,]
+```
+
+This prints a lists the edges with the top 5 highest partial correlation value. 
+
+```{r}
+#'
+#' # Decide which edges to include in the network
+
+#' To obtain a graph you need to select top ranking edges according to 
+#' a suitable criterion.  Here are some suggestions:
+#'
+#' 1. Use local fdr cutoff 0.2, i.e. include all edges with posterior 
+#' probability of at least 0.8.
+ecoli.net = extract.network(ecoli.edges)
+dim(ecoli.net)
+```
+
+When using a local cutoff of 0.2 we get 125 significant edges, which is 2.43% of all possible in the network. The number of significant directions in the network is 17, this suggests that of all the potential directional relationships in the selected 125 significant edges, 13.6% were deemed significant
+
+
+
+```{r}
+#' 2. Use local fdr cutoff 0.1, i.e. i.e. include all edges with posterior 
+#' probability of at least 0.9.
+
+ecoli.net = extract.network(ecoli.edges, cutoff.ggm=0.9, cutoff.dir=0.9)
+dim(ecoli.net)
+```
+
+Include edges with a posterior probability of at least 0.9.
+
+
+```{r}
+#' 3. Include a fixed number of edges, say the 70 strongest edges
+ecoli.net = extract.network(ecoli.edges, method.ggm="number", cutoff.ggm=70)
+dim(ecoli.net)
+```
+
+Instead of having a specific cutoff, use a max number of edges, number in in this example is 70. 
+
+
+
+```{r}
+#' 
+#' Plot network
+
+#' For plotting we use the graph and Rgraphviz packages from Bioconductor.
+library("Rgraphviz") 
+
+#' Create graph object from the list of edges:
+node.labels = colnames(ecoli)
+gr = network.make.graph(ecoli.net, node.labels, drop.singles=TRUE)
+table(  edge.info(gr)$dir )
+sort( node.degree(gr), decreasing=TRUE)
+
+
+#' Set node and edge attributes for more beautiful graph plotting:
+globalAttrs = list()
+globalAttrs$edge = list(color = "black", lty = "solid", lwd = 1, arrowsize=1)
+globalAttrs$node = list(fillcolor = "lightblue", shape = "ellipse", fixedsize = FALSE)
+ 
+nodeAttrs = list()
+nodeAttrs$fillcolor = c('sucA' = "yellow")
+
+edi = edge.info(gr)
+edgeAttrs = list()
+edgeAttrs$dir = edi$dir # set edge directions 
+edgeAttrs$lty = ifelse(edi$weight < 0, "dotted", "solid") # negative correlation -> dotted
+edgeAttrs$color = ifelse(edi$dir == "none", "black", "red")
+edgeAttrs$label = round(edi$weight, 2) # use partial correlation as edge labels
+
+#+ fig.width=8, fig.height=7
+plot(gr, attrs = globalAttrs, nodeAttrs = nodeAttrs, edgeAttrs = edgeAttrs, "fdp")
+
+
+```
+
+
+Visualizing the extracted network, to explore the structure, relationships and patterns between the genes.
+
+The gene sucA is highlighted and it seems important as its the only gene that connects to some(sucD, atpG etc.) of the other genes in the network. It might have a significant biological relevance like being a hub gene or highly connected gene. 
+
+
+### Varying the criterion 
+
+
+```{r}
+ecoli.net = extract.network(ecoli.edges,method.ggm="qval", cutoff.ggm=0.02, cutoff.dir=0.9)
+dim(ecoli.net)
+```
+
+Changing the criterion for selecting significant partial correlations and significant directions, now going by q-value instead. Only picking edges with a q-value lower than 0.02.
+
+Now we only get 48 significant edges and 3 of them are directed in the network. 
+
+
+```{r}
+#' 
+#' Plot network
+
+#' For plotting we use the graph and Rgraphviz packages from Bioconductor.
+library("Rgraphviz") 
+
+#' Create graph object from the list of edges:
+node.labels = colnames(ecoli)
+gr = network.make.graph(ecoli.net, node.labels, drop.singles=TRUE)
+table(  edge.info(gr)$dir )
+sort( node.degree(gr), decreasing=TRUE)
+
+
+#' Set node and edge attributes for more beautiful graph plotting:
+globalAttrs = list()
+globalAttrs$edge = list(color = "black", lty = "solid", lwd = 1, arrowsize=1)
+globalAttrs$node = list(fillcolor = "lightblue", shape = "ellipse", fixedsize = FALSE)
+ 
+nodeAttrs = list()
+nodeAttrs$fillcolor = c('sucA' = "yellow")
+
+edi = edge.info(gr)
+edgeAttrs = list()
+edgeAttrs$dir = edi$dir # set edge directions 
+edgeAttrs$lty = ifelse(edi$weight < 0, "dotted", "solid") # negative correlation -> dotted
+edgeAttrs$color = ifelse(edi$dir == "none", "black", "red")
+edgeAttrs$label = round(edi$weight, 2) # use partial correlation as edge labels
+
+#+ fig.width=8, fig.height=7
+plot(gr, attrs = globalAttrs, nodeAttrs = nodeAttrs, edgeAttrs = edgeAttrs, "fdp")
+
+
+```
+asnA, lacY, lacA,b1583, lacZ
+
+A cluster here could be asnA, lacY, lacA, b1583, lacZ as they are well connected to each other but no that much to other genes, only positive partial correlations within and half of the edges to other genes outside the cluster have negative partial correlation. 
+
+
+### Cluster
+
+The lac operon of three genes, lacY, lacA and lacZ, which is an operon that is required for the transport of metabolism of lactose in E-coli, so for these three to be in the same cluster seems logical. 
+
+Asparagine synthetase A (AsnA) is an enzyme in E. coli that helps produce the amino acid asparagine. It does this by converting another amino acid, aspartate, into asparagine, using ammonia as part of the reaction. So its metabolic but not in the same way as the lac operons and E-coli have lots of genes with metabolic functions.
+
+Didn't manage to find anything that relates b1583(ynfB) to the other genes in the cluster.
 
 
 
