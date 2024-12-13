@@ -430,7 +430,7 @@ A cluster here could be asnA, lacY, lacA, b1583, lacZ as they are well connected
 
 The lac operon of three genes, lacY, lacA and lacZ, which is an operon that is required for the transport of metabolism of lactose in E-coli, so for these three to be in the same cluster seems logical. 
 
-Asparagine synthetase A (AsnA) is an enzyme in E. coli that helps produce the amino acid asparagine. It does this by converting another amino acid, aspartate, into asparagine, using ammonia as part of the reaction. So its metabolic but not in the same way as the lac operons and E-coli have lots of genes with metabolic functions.
+Asparagine synthetase A (AsnA) is an enzyme in E. coli that helps produce the amino acid asparagine. It does this by converting another amino acid, aspartate, into asparagine, using ammonia as part of the reaction. So its metabolic but not in the same way as the lac operons and E-coli have lots of genes with metabolic functions, but the function to produce asparagine is very specific to Asna.
 
 Didn't manage to find anything that relates b1583(ynfB) to the other genes in the cluster.
 
