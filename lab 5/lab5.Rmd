@@ -263,7 +263,7 @@ data(ecoli)
 dim(ecoli)
 ```
 
-Loading tha dataset and its longitude data, with 120 variables measured at 9 different timepoints.
+Loading tha dataset and its longitude data, with 120 variables measured at 9 different time points.
 
 
 
@@ -276,7 +276,7 @@ pc = ggm.estimate.pcor(ecoli)
 dim(pc)
 ```
 
-This step estimates the partial correlation for all pairs of genes in the dataset. The output will be a square matrix of partial correlations.
+This step estimates the partial correlation for all pairs of genes in the dataset using a shrinkage estimator to reduce variability en improve precision. The output will be a square matrix of partial correlations.
 
 
 ```{r}
@@ -310,6 +310,7 @@ dim(ecoli.net)
 
 When using a local cutoff of 0.2 we get 125 significant edges, which is 2.43% of all possible in the network. The number of significant directions in the network is 17, this suggests that of all the potential directional relationships in the selected 125 significant edges, 13.6% were deemed significant
 
+The method used here is called the False Discovery Rate(FDR).
 
 
 ```{r}
@@ -329,7 +330,7 @@ ecoli.net = extract.network(ecoli.edges, method.ggm="number", cutoff.ggm=70)
 dim(ecoli.net)
 ```
 
-Instead of having a specific cutoff, use a max number of edges, number in in this example is 70. 
+Instead of using FDR, you can set a max number of edges and only include the strongest, number in in this example is 70. 
 
 
 
@@ -421,7 +422,7 @@ plot(gr, attrs = globalAttrs, nodeAttrs = nodeAttrs, edgeAttrs = edgeAttrs, "fdp
 
 
 ```
-asnA, lacY, lacA,b1583, lacZ
+
 
 A cluster here could be asnA, lacY, lacA, b1583, lacZ as they are well connected to each other but no that much to other genes, only positive partial correlations within and half of the edges to other genes outside the cluster have negative partial correlation. 
 
