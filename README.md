@@ -24,9 +24,9 @@ Lab 2 -  DNA sequence acquisition and simulation, Sequence analysis and Phylogen
 
 Lab 3 -  Phylogeny comparative models
 
-Lab 4 - 
+Lab 4 - Gene expression analysis and visualization
 
-Lab 5 - 
+Lab 5 - Graph clustering and biological analysis
 
 <div align="center">
   <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNm01cnJrdXdjYXMzb3Rsb2UzYnI3eGo0ajRncTkxbTFlaXVkNDJ3YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKLC8zBUd7eEteE/giphy.webp" width="500" height="500" alt="DNA Animation"/> 
